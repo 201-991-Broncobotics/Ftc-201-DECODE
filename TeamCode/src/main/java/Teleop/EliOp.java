@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
@@ -27,12 +28,10 @@ public class EliOp extends LinearOpMode {
     mechanisms.Turret turret = new mechanisms.Turret();
     Flywheel flywheel = new Flywheel();
     Intake intake = new Intake();
-    Limelight limelight = new Limelight();
     private IMU imu;
 
 
     ColorSensor cs0;
-
 
     @Override
     public void runOpMode() {
@@ -52,18 +51,13 @@ public class EliOp extends LinearOpMode {
                 telemetry
         );
         drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
         waitForStart();
-        drive.zeroModules();
-
-
-// Zero modules once robot is on the floor and still
-
         while (opModeIsActive()) {
             turret.controls();
             flywheel.controls();
             intake.control();
-
+            telemetry.update();
+            telemetry.addData("Flywheel Volcity", flywheel.targetVelocity);
             double forward = -gamepad2.left_stick_y;
             double strafe = gamepad2.left_stick_x;
             double turn = gamepad2.right_stick_x;
@@ -75,16 +69,6 @@ public class EliOp extends LinearOpMode {
 
             double throttle = 1.0;
             drive.drive(forward, strafe, turn, throttle);
-
-            if (gamepad2.a) {
-                drive.zeroModules();
-                telemetry.addLine("Modules re-zeroed");
-            }
-
-            telemetry.addData("Forward", forward);
-            telemetry.addData("Strafe", strafe);
-            telemetry.addData("Turn", turn);
-            telemetry.update();
         }
     }
 }

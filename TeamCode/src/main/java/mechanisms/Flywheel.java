@@ -1,22 +1,30 @@
 package mechanisms;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 
 public class Flywheel {
     boolean flywheeltoggle = false;
     boolean lastBPressed = false;
-    private DcMotor flywheel;
+    private DcMotorEx flywheel;
+    public double targetVelocity = -4200;
+
     Gamepad Controller;
 
 
     public void init(HardwareMap hdwMap, Gamepad controller) {
 
-        flywheel = hdwMap.get(DcMotor.class, "flyM");
+        flywheel = hdwMap.get(DcMotorEx.class, "flyM");
         Controller = controller;
-
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
     public void setFlywheel(double power) {
@@ -24,14 +32,14 @@ public class Flywheel {
     }
 
     public void controls() {
-        if(Controller.b && !lastBPressed) {
+        if (Controller.b && !lastBPressed) {
             flywheeltoggle = !flywheeltoggle;
         }
+        lastBPressed = Controller.b;
         if (flywheeltoggle) {
-            flywheel.setPower(-.70); // Flywheel on
+            flywheel.setVelocity(targetVelocity); // Set target speed
         } else {
-            flywheel.setPower(0);  // flywheel off
+            flywheel.setVelocity(0); // Stop flywheel
         }
     }
-}
-
+    }

@@ -10,6 +10,8 @@ public class DiffySwerveKinematics {
     private final Telemetry telemetry;
     private double maxPower = 1.0;
 
+    private double lastRightAngle, lastLeftAngle;
+
     public DiffySwerveKinematics(
             DcMotorEx leftTop, DcMotorEx leftBottom,
             DcMotorEx rightBottom, DcMotorEx rightTop,
@@ -17,9 +19,11 @@ public class DiffySwerveKinematics {
 
         this.telemetry = telemetry;
         this.maxPower = maxPowerLimit;
+        lastRightAngle = 0;
+        lastLeftAngle = 0;
 
-        rightModule = new SwerveModule(rightTop, rightBottom, 1.0);
-        leftModule = new SwerveModule(leftTop, leftBottom, 1.0);
+        rightModule = new SwerveModule(rightTop, rightBottom, 0, 1.0);
+        leftModule = new SwerveModule(leftTop, leftBottom, 0, 1.0);
     }
 
     public void drive(double forward, double strafe, double turn, double throttle) {
@@ -42,8 +46,16 @@ public class DiffySwerveKinematics {
         double rightAngle = Math.toDegrees(Math.atan2(strafe, A));
         double leftAngle  = Math.toDegrees(Math.atan2(strafe, B));
 
-        rightModule.setModule(rightAngle, rightPower, maxPower);
-        leftModule.setModule(leftAngle, leftPower, maxPower);
+        if (!(Math.abs(strafe) > 0 || Math.abs(forward) > 0 || Math.abs(turn) > 0)) {
+            rightModule.setModule(lastRightAngle, 0, maxPower);
+            leftModule.setModule(lastLeftAngle, 0, maxPower);
+        } else {
+            rightModule.setModule(rightAngle, rightPower, maxPower);
+            leftModule.setModule(leftAngle, leftPower, maxPower);
+            lastRightAngle = rightModule.getCurrentAngle();
+            lastLeftAngle = leftModule.getCurrentAngle();
+        }
+
 
         telemetry.addData("Right Angle", rightModule.getCurrentAngle());
         telemetry.addData("Left Angle", leftModule.getCurrentAngle());
