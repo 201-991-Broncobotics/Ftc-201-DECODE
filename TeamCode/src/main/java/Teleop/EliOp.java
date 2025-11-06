@@ -1,5 +1,6 @@
 package Teleop;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -29,6 +30,10 @@ public class EliOp extends LinearOpMode {
     Flywheel flywheel = new Flywheel();
     Intake intake = new Intake();
     private IMU imu;
+    private Limelight limelight = new Limelight();
+    boolean autoTrackToggle = false;
+    boolean lastBumperPressed = false;
+
 
 
     ColorSensor cs0;
@@ -38,7 +43,8 @@ public class EliOp extends LinearOpMode {
 
         operator = gamepad2;
         driver = gamepad1;
-
+        limelight.init(hardwareMap, driver);
+        telemetry.addLine("Limelight initialized");
         turret.init(hardwareMap, driver);
         flywheel.init(hardwareMap, driver);
         intake.init(hardwareMap, driver);
@@ -52,12 +58,52 @@ public class EliOp extends LinearOpMode {
         );
         drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         waitForStart();
+        limelight.start();
         while (opModeIsActive()) {
+
+            // ---------- Toggle Auto-Track ----------
+            if (driver.left_bumper && !lastBumperPressed) {
+                autoTrackToggle = !autoTrackToggle;
+            }
+            lastBumperPressed = driver.left_bumper;
+
+            // ---------- Turret Control ----------
+            boolean manualTurretActive = driver.right_trigger > 0.1 || driver.left_trigger > 0.1;
+
+            if (manualTurretActive) {
+                turret.controls(); // manual override
+            } else if (autoTrackToggle) {
+                LLResult llResult = limelight.getResult();
+                if (llResult != null && llResult.isValid()) {
+                    double tx = llResult.getTx(); // horizontal offset
+                    double deadzone = 1.0;
+                    double power = 0.4;
+
+                    if (tx > deadzone) turret.autoTrack(power);
+                    else if (tx < -deadzone) turret.autoTrack(-power);
+                    else turret.autoTrack(0);
+
+                    telemetry.addData("AutoTrack Tx", tx);
+                } else {
+                    turret.autoTrack(0);
+                    telemetry.addLine("No valid Limelight target");
+                }
+            } else {
+                turret.autoTrack(0); // stop if no manual or auto-track
+            }
+
             turret.controls();
             flywheel.controls();
             intake.control();
             telemetry.update();
             telemetry.addData("Flywheel Volcity", flywheel.targetVelocity);
+            LLResult llResult = limelight.getResult();
+            if (llResult != null && llResult.isValid()) {
+                telemetry.addData("Limelight Tx", llResult.getTx());
+                telemetry.addData("Limelight Ty", llResult.getTy());
+                telemetry.addData("Limelight Ta", llResult.getTa());
+            } else {
+                telemetry.addLine("No valid Limelight target"); }
             double forward = -gamepad2.left_stick_y;
             double strafe = gamepad2.left_stick_x;
             double turn = gamepad2.right_stick_x;

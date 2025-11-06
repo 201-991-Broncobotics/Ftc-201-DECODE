@@ -11,8 +11,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 
 public class Flywheel {
-    boolean flywheeltoggle = false;
-    boolean lastBPressed = false;
+    boolean flywheeltoggle, lastBPressed, lastbumppressed, autotracktoggle = false;
+    ;
     private DcMotorEx flywheel;
     public double targetVelocity = -4200;
 
@@ -42,4 +42,4 @@ public class Flywheel {
             flywheel.setVelocity(0); // Stop flywheel
         }
     }
-    }
+}

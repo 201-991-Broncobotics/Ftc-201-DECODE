@@ -64,7 +64,7 @@ public class SwerveModule {
         if (Math.abs(speed) > 0) speed = (1 - driveFeedBackStaticPower) * speed + Math.signum(speed) * driveFeedBackStaticPower;
 
         // rate at which the wheel attempts to realign itself vs power diverted towards moving forward
-        double DriveSharpnessCurve = Math.sin(((Math.abs(angleDifference(getCurrentAngle(), angle, 360)) / 90) - 1) * Math.PI / 2);
+        speed = speed * Math.signum(Math.sin(((Math.abs(angleDifference(getCurrentAngle(), angle, 360)) / 90) - 1) * Math.PI / 2));
 
         // maintain the correct motor speed balance
         double R1Power = speed + rotation;
@@ -103,7 +103,9 @@ public class SwerveModule {
         double result2 = Math.floorMod(Math.round((targetAngle - currentAngle) * 100), -wrapAngle * 100L) * 0.01;
         if (Math.abs(result1) <= Math.abs(result2)) return result1;
         else return result2;
+
     }
+
 
 
 
