@@ -8,9 +8,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
 public class Intake {
     boolean intaketoggle, lastAPressed, lastXPressed, rollertoggle, lastYPressed, ballflickup, lastbumperpress, lrollertoggle, dpadpress, dpadtoggle = false;
     boolean autotracktoggle, lastbumppressed = false;
+
+    // 🔹 New variables for release servo
+    private boolean releaseToggle = false;
+    private boolean lastR3Pressed = false;
 
     Gamepad Controller;
     private sensors.Limelight limelight;
@@ -19,10 +24,12 @@ public class Intake {
         limelight = ll;
     }
 
-    private DcMotor intake, highroll; //hRolS0
-
+    private DcMotor intake, highroll;
     private Servo ballflick;
     private CRServo lowerroller1, lowerroller2;
+
+    // 🔹 New servo
+    private Servo releaseServo; // relS
 
     public void init(HardwareMap hwdM, Gamepad controller) {
         intake = hwdM.get(DcMotor.class, "intM");
@@ -30,11 +37,19 @@ public class Intake {
         ballflick = hwdM.get(Servo.class, "pusS");
         lowerroller1 = hwdM.get(CRServo.class, "lRolS0");
         lowerroller2 = hwdM.get(CRServo.class, "lRolS1");
+
+        // 🔹 Initialize new servo
+        releaseServo = hwdM.get(Servo.class, "sorS");
+
         Controller = controller;
     }
 
     public void setIntake(double power) {
         intake.setPower(power);
+    }
+
+    public void setHighroll(double power) {
+        highroll.setPower(power);
     }
 
     public void lowerRollers(double power) {
@@ -92,5 +107,16 @@ public class Intake {
             intaketoggle = !intaketoggle;
             lrollertoggle = !lrollertoggle;
         }
+
+        // 🔹 New Release Servo Control (R3 button)
+        if (Controller.right_stick_button && !lastR3Pressed) {
+            releaseToggle = !releaseToggle;
+            if (releaseToggle) {
+                releaseServo.setPosition(270); // move up 90° (adjust if needed)
+            } else {
+                releaseServo.setPosition(0); // back down
+            }
+        }
+        lastR3Pressed = Controller.right_stick_button;
     }
 }

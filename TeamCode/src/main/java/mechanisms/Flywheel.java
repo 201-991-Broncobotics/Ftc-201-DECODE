@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.tel
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -14,7 +15,7 @@ public class Flywheel {
     boolean flywheeltoggle, lastBPressed, lastbumppressed, autotracktoggle = false;
     ;
     private DcMotorEx flywheel;
-    public double targetVelocity = -4200;
+    public double targetVelocity = -3000;
 
     Gamepad Controller;
 
@@ -25,10 +26,11 @@ public class Flywheel {
         Controller = controller;
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void setFlywheel(double power) {
-        flywheel.setPower(power);
+        flywheel.setVelocity(targetVelocity);
     }
 
     public void controls() {

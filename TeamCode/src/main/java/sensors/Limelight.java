@@ -22,9 +22,9 @@ public class Limelight {
     private IMU imu;
     private Turret turret;
 
-    public void init(HardwareMap hwdM, Gamepad controller) {
+    public void init(HardwareMap hwdM, Gamepad controller, int pipeline) {
         limelight = hwdM.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(pipeline);
         RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.FORWARD, RevHubOrientationOnRobot.UsbFacingDirection.DOWN);
         Controller = controller;
 

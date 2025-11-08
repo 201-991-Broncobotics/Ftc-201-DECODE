@@ -48,7 +48,7 @@ public class PIDController {
         minPosition = 0; // doesn't matter what this is if position limiting is false, same units as the doubleSupplier
         maxPosition = 0; // doesn't matter what this is if position limiting is false, same units as the doubleSupplier
         minPower = 0; // can be used as the initial power needed to start moving
-        maxPower = 1;
+        maxPower = .4;
         initialPower = 0; // power needed to start turning the motor / SET A MINIMUM POWER WHEN THIS IS GREATER THAN 0 or the PID will oscillate
         minDifference = 0; // stops PID when the error is less than this, same units as the doubleSupplier
         maxSpeed = 0; // IF SET TO 0, MAX SPEED WILL BE IGNORED, also doesn't matter what this is if speed limiting is false, in units per second

@@ -23,8 +23,8 @@ import mechanisms.Intake;
 import mechanisms.Turret;
 import sensors.Limelight;
 
-@TeleOp(name = "Eli Op", group = "Concept")
-public class EliOp extends LinearOpMode {
+@TeleOp(name = "Blue Op", group = "Concept")
+public class BlueOp extends LinearOpMode {
 
     Gamepad operator, driver;
     Tank drive = new Tank();
@@ -45,7 +45,7 @@ public class EliOp extends LinearOpMode {
 
         operator = gamepad2;
         driver = gamepad1;
-        limelight.init(hardwareMap, driver,0);
+        limelight.init(hardwareMap, driver,1);
         telemetry.addLine("Limelight initialized");
         turret.init(hardwareMap, driver);
         flywheel.init(hardwareMap, driver);
