@@ -42,7 +42,7 @@ public class Basic_PGP_Auto extends LinearOpMode {
         runtime.reset();
 
         // --- Step 1: Spin up flywheel ---
-        flywheel.setFlywheel(3000);
+        flywheel.setFlywheel(2500);
         sleep(1000);
 
         // --- Step 2: Auto-track target for up to 3 seconds ---

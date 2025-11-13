@@ -72,7 +72,7 @@ public class Intake {
         }
         lastXPressed = Controller.x;
         if (rollertoggle) {
-            highroll.setPower(-.60);
+            highroll.setPower(-.80);
         } else {
             highroll.setPower(0);
         }

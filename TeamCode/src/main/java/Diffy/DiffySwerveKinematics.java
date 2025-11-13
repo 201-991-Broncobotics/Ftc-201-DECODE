@@ -8,7 +8,7 @@ public class DiffySwerveKinematics {
 
     private final SwerveModule rightModule, leftModule;
     private final Telemetry telemetry;
-    private double maxPower = 1.0;
+    private double maxPower = 0.7;
 
     private double lastRightAngle, lastLeftAngle;
 

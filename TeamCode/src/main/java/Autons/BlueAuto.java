@@ -42,7 +42,7 @@ public class BlueAuto extends LinearOpMode {
         runtime.reset();
 
         // --- Step 1: Spin up flywheel ---
-        flywheel.setFlywheel(3000);
+        flywheel.setFlywheel(0.6);
         sleep(1000);
 
         // --- Step 2: Auto-track target for up to 3 seconds ---
@@ -74,9 +74,9 @@ public class BlueAuto extends LinearOpMode {
 
         // --- Step 3: Drive forward for 2 seconds ---
         runtime.reset();
-        while (opModeIsActive() && runtime.seconds() < 7.0) {
-            drive.setRight(-0.5, -0.5);
-            drive.setLeft(-0.5, -0.5);
+        while (opModeIsActive() && runtime.seconds() < 4.0) {
+            drive.setRight(-0.2, -0.2);
+            drive.setLeft(-0.2, -0.2);
         }
 
         // --- Step 4: Stop drive ---

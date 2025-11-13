@@ -1,5 +1,7 @@
 package Teleop;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -12,6 +14,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import java.io.CharArrayWriter;
@@ -25,9 +28,9 @@ import sensors.Limelight;
 
 @TeleOp(name = "Eli Op", group = "Concept")
 public class EliOp extends LinearOpMode {
+    DiffySwerveKinematics drive;
 
     Gamepad operator, driver;
-    Tank drive = new Tank();
     mechanisms.Turret turret = new mechanisms.Turret();
     Flywheel flywheel = new Flywheel();
     Intake intake = new Intake();
@@ -50,7 +53,15 @@ public class EliOp extends LinearOpMode {
         turret.init(hardwareMap, driver);
         flywheel.init(hardwareMap, driver);
         intake.init(hardwareMap, driver);
-        drive.init(hardwareMap, operator);
+        drive = new DiffySwerveKinematics(
+                hardwareMap.get(DcMotorEx.class, "lSwe0"),
+                hardwareMap.get(DcMotorEx.class, "lSwe1"),
+                hardwareMap.get(DcMotorEx.class, "rSwe1"),
+                hardwareMap.get(DcMotorEx.class, "rSwe0"),
+                1.0, // max motor power limit
+                telemetry
+        );
+        drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         waitForStart();
         limelight.start();
         while (opModeIsActive()) {
@@ -87,11 +98,10 @@ public class EliOp extends LinearOpMode {
             }
 
             turret.controls();
-            flywheel.controls();
-            drive.drive();
+            flywheel.controls(-driver.right_stick_y * 3/5       );
+
             intake.control();
-            telemetry.update();
-            telemetry.addData("Flywheel Volcity", flywheel.targetVelocity);
+            telemetry.addData("Flywheel Volcity", flywheel.setPower);
             LLResult llResult = limelight.getResult();
             if (llResult != null && llResult.isValid()) {
                 telemetry.addData("Limelight Tx", llResult.getTx());
@@ -99,6 +109,12 @@ public class EliOp extends LinearOpMode {
                 telemetry.addData("Limelight Ta", llResult.getTa());
             } else {
                 telemetry.addLine("No valid Limelight target"); }
+            telemetry.addData("Motor Speed: ", flywheel.flywheel.getPower());
+            telemetry.addData("Controller Power: ", (driver.right_stick_y * (3/5)));
+            telemetry.update();
+            double forward = -gamepad2.left_stick_y;
+            double strafe = gamepad2.left_stick_x;
+            double turn = gamepad2.right_stick_x;
         }
     }
 }

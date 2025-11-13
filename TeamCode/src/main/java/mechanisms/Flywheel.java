@@ -9,13 +9,14 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 public class Flywheel {
     boolean flywheeltoggle, lastBPressed, lastbumppressed, autotracktoggle = false;
     ;
-    private DcMotorEx flywheel;
-    public double targetVelocity = -3000;
+    public DcMotor flywheel;
+    public double setPower = -0.6;
 
     Gamepad Controller;
 
@@ -30,18 +31,18 @@ public class Flywheel {
     }
 
     public void setFlywheel(double power) {
-        flywheel.setVelocity(targetVelocity);
+        flywheel.setPower(power);
     }
 
-    public void controls() {
+    public void controls(double power) {
         if (Controller.b && !lastBPressed) {
             flywheeltoggle = !flywheeltoggle;
         }
         lastBPressed = Controller.b;
         if (flywheeltoggle) {
-            flywheel.setVelocity(targetVelocity); // Set target speed
+            flywheel.setPower(power); // Set target speed
         } else {
-            flywheel.setVelocity(0); // Stop flywheel
+            flywheel.setPower(0); // Stop flywheel
         }
     }
 }

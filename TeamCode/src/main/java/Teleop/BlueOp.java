@@ -1,5 +1,7 @@
 package Teleop;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -12,6 +14,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import java.io.CharArrayWriter;
@@ -87,11 +90,10 @@ public class BlueOp extends LinearOpMode {
             }
 
             turret.controls();
-            flywheel.controls();
+            flywheel.controls(-driver.right_stick_y);
             drive.drive();
             intake.control();
-            telemetry.update();
-            telemetry.addData("Flywheel Volcity", flywheel.targetVelocity);
+            telemetry.addData("Flywheel Volcity", flywheel.setPower);
             LLResult llResult = limelight.getResult();
             if (llResult != null && llResult.isValid()) {
                 telemetry.addData("Limelight Tx", llResult.getTx());
@@ -99,6 +101,9 @@ public class BlueOp extends LinearOpMode {
                 telemetry.addData("Limelight Ta", llResult.getTa());
             } else {
                 telemetry.addLine("No valid Limelight target"); }
+            telemetry.addData("Motor Speed: ", flywheel.flywheel.getPower());
+            telemetry.addData("Controller Magnitude: ", driver.right_stick_y);
+            telemetry.update();
         }
     }
 }
