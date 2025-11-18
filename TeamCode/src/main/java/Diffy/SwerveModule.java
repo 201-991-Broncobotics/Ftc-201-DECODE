@@ -68,11 +68,11 @@ public class SwerveModule {
 
         // maintain the correct motor speed balance
         double R1Power = speed + rotation;
-        double R2Power = -1 * speed + rotation;
+        double R2Power = speed + rotation;
         double divider = Math.max(1, Math.max(R1Power / maxPowerLimit, R2Power / maxPowerLimit));
 
-        R1Power = -1 * R1Power / divider;
-        R2Power = -1 * R2Power / divider;
+        R1Power =  R1Power / divider;
+        R2Power =  R2Power / divider;
 
         topMotor.setPower(R1Power);
         LastR1Power = R1Power;

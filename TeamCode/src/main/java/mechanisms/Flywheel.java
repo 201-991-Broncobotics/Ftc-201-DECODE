@@ -34,15 +34,21 @@ public class Flywheel {
         flywheel.setPower(power);
     }
 
-    public void controls(double power) {
-        if (Controller.b && !lastBPressed) {
+    public void controls() {
+        if (Controller.left_bumper && !lastBPressed) {
             flywheeltoggle = !flywheeltoggle;
         }
-        lastBPressed = Controller.b;
+        lastBPressed = Controller.left_bumper;
         if (flywheeltoggle) {
-            flywheel.setPower(power); // Set target speed
+            flywheel.setPower(setPower); // Set target speed
         } else {
             flywheel.setPower(0); // Stop flywheel
+        }
+        if (Controller.dpad_up){
+            setPower = setPower - 0.05;
+        }
+        if (Controller.dpad_down){
+            setPower = setPower + 0.05;
         }
     }
 }

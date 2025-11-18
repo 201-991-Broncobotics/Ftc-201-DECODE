@@ -90,7 +90,7 @@ public class BlueOp extends LinearOpMode {
             }
 
             turret.controls();
-            flywheel.controls(-driver.right_stick_y);
+            flywheel.controls();
             drive.drive();
             intake.control();
             telemetry.addData("Flywheel Volcity", flywheel.setPower);

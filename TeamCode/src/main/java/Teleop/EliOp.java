@@ -1,29 +1,16 @@
 package Teleop;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-
-import java.io.CharArrayWriter;
 
 import Diffy.DiffySwerveKinematics;
-import InCaseDiffyFails.Tank;
 import mechanisms.Flywheel;
 import mechanisms.Intake;
-import mechanisms.Turret;
 import sensors.Limelight;
 
 @TeleOp(name = "Eli Op", group = "Concept")
@@ -37,7 +24,7 @@ public class EliOp extends LinearOpMode {
     private IMU imu;
     private Limelight limelight = new Limelight();
     boolean autoTrackToggle = false;
-    boolean lastBumperPressed = false;
+    boolean lastR3Pressed = false;
 
 
 
@@ -58,19 +45,19 @@ public class EliOp extends LinearOpMode {
                 hardwareMap.get(DcMotorEx.class, "lSwe1"),
                 hardwareMap.get(DcMotorEx.class, "rSwe1"),
                 hardwareMap.get(DcMotorEx.class, "rSwe0"),
-                1.0, // max motor power limit
+                1, // max motor power limit
                 telemetry
         );
-        drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        drive.zeroModules();
         waitForStart();
         limelight.start();
         while (opModeIsActive()) {
 
             // ---------- Toggle Auto-Track ----------
-            if (driver.left_bumper && !lastBumperPressed) {
+            if (driver.right_stick_button && !lastR3Pressed) {
                 autoTrackToggle = !autoTrackToggle;
             }
-            lastBumperPressed = driver.left_bumper;
+            lastR3Pressed = driver.right_stick_button;
 
             // ---------- Turret Control ----------
             boolean manualTurretActive = driver.right_trigger > 0.1 || driver.left_trigger > 0.1;
@@ -98,7 +85,7 @@ public class EliOp extends LinearOpMode {
             }
 
             turret.controls();
-            flywheel.controls(-driver.right_stick_y * 3/5       );
+            flywheel.controls();
 
             intake.control();
             telemetry.addData("Flywheel Volcity", flywheel.setPower);
@@ -110,11 +97,13 @@ public class EliOp extends LinearOpMode {
             } else {
                 telemetry.addLine("No valid Limelight target"); }
             telemetry.addData("Motor Speed: ", flywheel.flywheel.getPower());
-            telemetry.addData("Controller Power: ", (driver.right_stick_y * (3/5)));
             telemetry.update();
             double forward = -gamepad2.left_stick_y;
             double strafe = gamepad2.left_stick_x;
             double turn = gamepad2.right_stick_x;
+
+            double throttle = 1.0;
+            drive.drive(forward, strafe, turn, throttle);
         }
     }
-}
+        }
