@@ -1,29 +1,15 @@
 package Teleop;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-
-import java.io.CharArrayWriter;
-
-import Diffy.DiffySwerveKinematics;
 import InCaseDiffyFails.Tank;
 import mechanisms.Flywheel;
 import mechanisms.Intake;
-import mechanisms.Turret;
 import sensors.Limelight;
 
 @TeleOp(name = "Blue Op", group = "Concept")
@@ -93,7 +79,7 @@ public class BlueOp extends LinearOpMode {
             flywheel.controls();
             drive.drive();
             intake.control();
-            telemetry.addData("Flywheel Volcity", flywheel.setPower);
+            telemetry.addData("Flywheel Volcity", flywheel.flywheel.getPower());
             LLResult llResult = limelight.getResult();
             if (llResult != null && llResult.isValid()) {
                 telemetry.addData("Limelight Tx", llResult.getTx());

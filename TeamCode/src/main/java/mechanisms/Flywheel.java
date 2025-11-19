@@ -1,22 +1,20 @@
 package mechanisms;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+import static mechanisms.Settings.FlyPower;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import mechanisms.Settings;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 public class Flywheel {
     boolean flywheeltoggle, lastBPressed, lastbumppressed, autotracktoggle = false;
     ;
     public DcMotor flywheel;
-    public double setPower = -0.6;
 
     Gamepad Controller;
 
@@ -40,15 +38,15 @@ public class Flywheel {
         }
         lastBPressed = Controller.left_bumper;
         if (flywheeltoggle) {
-            flywheel.setPower(setPower); // Set target speed
+            flywheel.setPower(FlyPower); // Set target speed
         } else {
             flywheel.setPower(0); // Stop flywheel
         }
-        if (Controller.dpad_up){
-            setPower = setPower - 0.05;
+        if (Controller.dpadUpWasPressed()){
+            FlyPower = FlyPower + 0.05;
         }
-        if (Controller.dpad_down){
-            setPower = setPower + 0.05;
+        if (Controller.dpadDownWasPressed()){
+            FlyPower = FlyPower - 0.05;
         }
     }
 }

@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import java.util.function.DoubleSupplier;
 
+import mechanisms.Settings;
+
 public class SwerveModule {
 
     private final Diffy.PIDController modulePID;
@@ -18,25 +20,27 @@ public class SwerveModule {
     private boolean usePhoton = false;
     private double LastR1Power = 0, LastR2Power = 0;
 
-    public double bottomMotorCoeff = 1;
+    public boolean reverseForward = false;
 
+    public boolean reversedEncoder = false;
     public static double driveFeedBackStaticPower = 0.12; // power required from motors before robot starts moving (helps when at low speeds)
 
 
-    public SwerveModule(DcMotorEx newTopMotor, DcMotorEx newBottomMotor, double startingAngle, double BottomMotorCoeff) { // initialize the module
+    public SwerveModule(DcMotorEx newTopMotor, DcMotorEx newBottomMotor, double startingAngle, boolean ReverseForward, boolean ReversedEncoder) { // initialize the module
         ModuleZeroAngle = startingAngle;
         topMotor = newTopMotor;
         bottomMotor = newBottomMotor;
-        topMotorEncoder = () -> angleDifference((topMotor.getCurrentPosition() / 8192.0 * 360) - ModuleZeroAngle, 0, 360);
-        modulePID = new Diffy.PIDController(0.007, 0, 0.0002, topMotorEncoder);
-        bottomMotorCoeff = BottomMotorCoeff;
+        reversedEncoder = ReversedEncoder;
+        topMotorEncoder = () -> angleDifference((((reversedEncoder)? -1 : 1) * topMotor.getCurrentPosition() / 8192.0 * 360) - ModuleZeroAngle, 0, 360);
+        modulePID = new Diffy.PIDController(Settings.SwerveKP, 0, 0.0002, topMotorEncoder);
+        reverseForward = ReverseForward;
     }
 
 
     public void zeroSwerveModule() {
         topMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         topMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ModuleZeroAngle = (topMotor.getCurrentPosition() / 8192.0 * 360);
+        ModuleZeroAngle = (((reversedEncoder)? -1 : 1) * topMotor.getCurrentPosition() / 8192.0 * 360);
         modulePID.replaceDoubleSupplier(topMotorEncoder);
     }
 
@@ -56,6 +60,8 @@ public class SwerveModule {
 
 
     public void setModule(double angle, double speed, double maxPowerLimit) {
+        modulePID.kP = Settings.SwerveKP;
+        modulePID.kD = Settings.SwerveKD;
 
         double rotation = modulePID.getPowerWrapped(angle, 180);
 
@@ -67,17 +73,17 @@ public class SwerveModule {
         speed = speed * Math.signum(Math.sin(((Math.abs(angleDifference(getCurrentAngle(), angle, 360)) / 90) - 1) * Math.PI / 2));
 
         // maintain the correct motor speed balance
-        double R1Power = speed + rotation;
-        double R2Power = -1*speed + rotation;
-        double divider = Math.max(1, Math.max(R1Power / maxPowerLimit, R2Power / maxPowerLimit));
+        double R1Power = ((reverseForward)? -1 : 1) * speed - rotation;
+        double R2Power = ((reverseForward)? -1 : 1) * -1 * speed - rotation;
+        double divider = Math.max(1, Math.max(Math.abs(R1Power) / maxPowerLimit, Math.abs(R2Power) / maxPowerLimit));
 
-        R1Power =  R1Power / divider;
-        R2Power =  R2Power / divider;
+        R1Power = R1Power / divider;
+        R2Power = R2Power / divider;
 
         topMotor.setPower(R1Power);
         LastR1Power = R1Power;
 
-        bottomMotor.setPower(bottomMotorCoeff * R2Power);
+        bottomMotor.setPower(R2Power);
         LastR2Power = R2Power;
     }
 
@@ -110,4 +116,3 @@ public class SwerveModule {
 
 
 }
-

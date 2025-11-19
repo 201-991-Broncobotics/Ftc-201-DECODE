@@ -1,5 +1,8 @@
 package mechanisms;
 
+import static mechanisms.Settings.IntakePowe;
+import static mechanisms.Settings.HighRolPow;
+
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -43,7 +46,7 @@ public class Intake {
         }
         lastAPressed = Controller.a;
         if (intaketoggle) {
-            intake.setPower(-.7); // intake on
+            intake.setPower(HighRolPow); // intake on
         } else {
             intake.setPower(0);  // intake off
         }
@@ -64,7 +67,7 @@ public class Intake {
         if (rollertoggle) {
             lowerroller1.setPower(-1);
             lowerroller2.setPower(1);
-            highroll.setPower(-.80);
+            highroll.setPower(IntakePowe);
         } else {
             lowerroller1.setPower(0);
             lowerroller2.setPower(0);

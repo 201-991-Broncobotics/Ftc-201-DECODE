@@ -1,4 +1,7 @@
+
 package Teleop;
+
+import static mechanisms.Settings.SweMax;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -45,7 +48,7 @@ public class EliOp extends LinearOpMode {
                 hardwareMap.get(DcMotorEx.class, "lSwe1"),
                 hardwareMap.get(DcMotorEx.class, "rSwe1"),
                 hardwareMap.get(DcMotorEx.class, "rSwe0"),
-                1, // max motor power limit
+                SweMax, // max motor power limit
                 telemetry
         );
         drive.zeroModules();
@@ -88,7 +91,7 @@ public class EliOp extends LinearOpMode {
             flywheel.controls();
 
             intake.control();
-            telemetry.addData("Flywheel Volcity", flywheel.setPower);
+            telemetry.addData("Flywheel Volcity", flywheel.flywheel.getPower());
             LLResult llResult = limelight.getResult();
             if (llResult != null && llResult.isValid()) {
                 telemetry.addData("Limelight Tx", llResult.getTx());
@@ -106,4 +109,4 @@ public class EliOp extends LinearOpMode {
             drive.drive(forward, strafe, turn, throttle);
         }
     }
-        }
+}
