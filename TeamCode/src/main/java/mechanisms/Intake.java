@@ -1,16 +1,21 @@
 package mechanisms;
 
+import static java.lang.Thread.sleep;
 import static mechanisms.Settings.IntakePowe;
 import static mechanisms.Settings.HighRolPow;
+import static mechanisms.Settings.redownpos;
+import static mechanisms.Settings.reuppos;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 // Controls: B = All intake rolles; R1 = Ball flick A= Intake
 public class Intake {
-    boolean intaketoggle, lastAPressed, lastBPressed, rollertoggle, ballflickup = false;
+    boolean intaketoggle, lastAPressed, lastBPressed, rollertoggle, ballflickup, lastXPressed = false;
     boolean autotracktoggle, lastbumppressed = false;
 
     // 🔹 New variables for release servo
@@ -20,14 +25,19 @@ public class Intake {
     private DcMotor intake, highroll;
     private Servo ballflick;
     private CRServo lowerroller1, lowerroller2;
-    private Servo releaseServo; // relS
+    private ElapsedTime shootTimer = new ElapsedTime();
+    private int shootState = 0;
+    private boolean shooting = false;
+    private Servo SortServo, realeaseservo; // relS
+
     public void init(HardwareMap hwdM, Gamepad controller) {
         intake = hwdM.get(DcMotor.class, "intM");
         highroll = hwdM.get(DcMotor.class, "hRolM");
         ballflick = hwdM.get(Servo.class, "pusS");
         lowerroller1 = hwdM.get(CRServo.class, "lRolS0");
         lowerroller2 = hwdM.get(CRServo.class, "lRolS1");
-        releaseServo = hwdM.get(Servo.class, "sorS");
+        SortServo = hwdM.get(Servo.class, "sorS");
+        realeaseservo = hwdM.get(Servo.class, "relS");
         Controller = controller;
     }
 
@@ -35,53 +45,92 @@ public class Intake {
         highroll.setPower(power);
     }
 
+    public void setIntake(double power) {
+        intake.setPower(power);
+    }
+
+    public void setBallflick(double pos) {
+        ballflick.setPosition(pos);
+    }
+
+
     public void lowerRollers(double power) {
         lowerroller1.setPower(power);
         lowerroller2.setPower(power);
     }
 
+    public void release(double pos) {
+        realeaseservo.setPosition(pos);
+    }
+
     public void control() {
-        if (Controller.a && !lastAPressed) {  // Button A
-            intaketoggle = !intaketoggle;
+
+        if (Controller.a) {
+            intake.setPower(IntakePowe);
+            setHighroll(HighRolPow);
+            lowerRollers(-1);
         }
-        lastAPressed = Controller.a;
-        if (intaketoggle) {
-            intake.setPower(HighRolPow); // intake on
-        } else {
-            intake.setPower(0);  // intake off
+        if (Controller.aWasReleased()) {
+            intake.setPower(1);
+            setHighroll(.5);
+            lowerRollers(-.3);
         }
-        if (Controller.right_bumper && !ballflickup) {  // Right Bumper ( Duh)
-            if (ballflick.getPosition() == 0) {
-                ballflick.setPosition(90);
-            } else {
-                ballflick.setPosition(0);
+        if (Controller.b && !shooting) {
+            shooting = true;
+            shootState = 0;
+            shootTimer.reset();
+        }
+
+        if (!Controller.b) {
+            shooting = false;
+            shootState = 0;
+            setBallflick(90);   // Push down
+            setIntake(0);
+        }
+
+// State machine to simulate the while-loop behavior safely
+        if (shooting) {
+            switch (shootState) {
+                case 0:
+                    // Step 1: start cycle
+                    setBallflick(0);       // push up
+                    setHighroll(HighRolPow);
+                    setIntake(0);
+                    shootTimer.reset();
+                    shootState = 1;
+                    break;
+
+                case 1:
+                    // Step 2: wait 100ms
+                    if (shootTimer.milliseconds() >= 200) {
+                        setBallflick(90);   // push down
+                        shootTimer.reset();
+                        shootState = 2;
+                    }
+                    break;
+
+                case 2:
+                    // Step 3: wait 250ms before next cycle
+                    if (shootTimer.milliseconds() >= 450) {
+                        shootState = 0; // loop back to step 1
+                    }
+                    break;
             }
-            ballflickup = true;
         }
-        if (!Controller.b) {    // B buttoN
-            lastBPressed = false;
+        if (Controller.x) {
+            setIntake(-IntakePowe);
+            lowerRollers(1);
+            setHighroll(-HighRolPow);
         }
-        if (Controller.b && !lastBPressed) {
-            rollertoggle = !rollertoggle;
-        }
-        if (rollertoggle) {
-            lowerroller1.setPower(-1);
-            lowerroller2.setPower(1);
-            highroll.setPower(IntakePowe);
-        } else {
-            lowerroller1.setPower(0);
-            lowerroller2.setPower(0);
-            highroll.setPower(0);
-        }
-        lastBPressed = Controller.b;
         if (Controller.y && !lastYPressed) {
             releaseToggle = !releaseToggle;
             if (releaseToggle) {
-                releaseServo.setPosition(270); // move up 90° (adjust if needed)
+                realeaseservo.setPosition(reuppos); // move up 90° (adjust if needed)
             } else {
-                releaseServo.setPosition(0); // back down
+                realeaseservo.setPosition(redownpos); // back down
             }
+            }
+            lastYPressed = Controller.y;
         }
-        lastYPressed = Controller.y;
     }
-}
+

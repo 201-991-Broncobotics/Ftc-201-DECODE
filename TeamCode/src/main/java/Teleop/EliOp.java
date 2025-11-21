@@ -1,6 +1,7 @@
 
 package Teleop;
 
+import static mechanisms.Settings.HighRolPow;
 import static mechanisms.Settings.SweMax;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -11,10 +12,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.RobotHardware;
+
 import Diffy.DiffySwerveKinematics;
 import mechanisms.Flywheel;
 import mechanisms.Intake;
+import mechanisms.Settings;
+import mechanisms.Turret;
 import sensors.Limelight;
+import sensors.RGB;
 
 @TeleOp(name = "Eli Op", group = "Concept")
 public class EliOp extends LinearOpMode {
@@ -24,6 +30,7 @@ public class EliOp extends LinearOpMode {
     mechanisms.Turret turret = new mechanisms.Turret();
     Flywheel flywheel = new Flywheel();
     Intake intake = new Intake();
+    RGB rgb = new RGB();
     private IMU imu;
     private Limelight limelight = new Limelight();
     boolean autoTrackToggle = false;
@@ -36,8 +43,9 @@ public class EliOp extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+
         operator = gamepad2;
-        driver = gamepad1;
+        driver = gamepad2;
         limelight.init(hardwareMap, driver,0);
         telemetry.addLine("Limelight initialized");
         turret.init(hardwareMap, driver);
@@ -55,6 +63,10 @@ public class EliOp extends LinearOpMode {
         waitForStart();
         limelight.start();
         while (opModeIsActive()) {
+            //Micah's thing
+            intake.setIntake(0);
+            intake.setHighroll(-0.1);
+            intake.lowerRollers(0);
 
             // ---------- Toggle Auto-Track ----------
             if (driver.right_stick_button && !lastR3Pressed) {
@@ -66,29 +78,50 @@ public class EliOp extends LinearOpMode {
             boolean manualTurretActive = driver.right_trigger > 0.1 || driver.left_trigger > 0.1;
 
             if (manualTurretActive) {
-                turret.controls(); // manual override
-            } else if (autoTrackToggle) {
+                // Turret
+                turret.controls();
+            } else {
                 LLResult llResult = limelight.getResult();
                 if (llResult != null && llResult.isValid()) {
                     double tx = llResult.getTx(); // horizontal offset
-                    double ta = llResult.getTa();
-                    double deadzone = 1.0;
-                    double power = 0.2;
-                    if (tx > deadzone) turret.autoTrack(power);
-                    else if (tx < -deadzone) turret.autoTrack(-power);
-                    else turret.autoTrack(0);
+
+                    // COMMENT THIS OUT WHEN TUNING IS DONE
+                    limelight.turretPID.setPIDF(
+                            Settings.turret_P,
+                            Settings.turret_I,
+                            Settings.turret_D,
+                            0.0
+                    );
+
+                    // Use PID to minimize tx
+                    double power = limelight.turretPID.calculate(tx);
+                    telemetry.addData("PID power:", power);
+                    // Clamp power to [-1, 1]
+                    power = power > 0 ? Math.min(1, power) : Math.max(-1, power);
+                    turret.setTurrets(power,power);
+
+                    // ELI'S ORIGINAL:
+                    // double deadzone = 1.0;
+                    // double power = 0.2;
+                    // if (tx > deadzone) robot.turret.setPower(power);
+                    // else if (tx < -deadzone) robot.turret.setPower(-power);
+                    // else robot.turret.setPower(0);
 
                     telemetry.addData("AutoTrack Tx", tx);
                 } else {
-                    turret.autoTrack(0);
+                    turret.setTurrets(0,0);
                     telemetry.addLine("No valid Limelight target");
+
                 }
-            } else {
-                turret.autoTrack(0); // stop if no manual or auto-track
             }
+            //  else {
+            //      robot.turret.setPower(0); // stop if no manual or auto-track
+            //  }
+
 
             turret.controls();
             flywheel.controls();
+
 
             intake.control();
             telemetry.addData("Flywheel Volcity", flywheel.flywheel.getPower());
@@ -107,6 +140,7 @@ public class EliOp extends LinearOpMode {
 
             double throttle = 1.0;
             drive.drive(forward, strafe, turn, throttle);
+            }
         }
     }
-}
+

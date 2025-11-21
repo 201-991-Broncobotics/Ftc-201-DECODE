@@ -11,6 +11,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import mechanisms.Settings;
 import mechanisms.Turret;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -39,4 +40,10 @@ public class Limelight {
     public LLResult getResult() {
         return limelight.getLatestResult();
     }
+    public final PIDFController turretPID = new PIDFController(
+            Settings.turret_P,
+            Settings.turret_I,
+            Settings.turret_D,
+            0.0);
 }
+
