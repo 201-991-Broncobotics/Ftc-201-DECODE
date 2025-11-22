@@ -126,6 +126,7 @@ public class Intake {
             releaseToggle = !releaseToggle;
             if (releaseToggle) {
                 realeaseservo.setPosition(reuppos); // move up 90° (adjust if needed)
+                SortServo.setPosition(180);
             } else {
                 realeaseservo.setPosition(redownpos); // back down
             }

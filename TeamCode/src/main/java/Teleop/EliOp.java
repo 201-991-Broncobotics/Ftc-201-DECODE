@@ -2,6 +2,7 @@
 package Teleop;
 
 import static mechanisms.Settings.HighRolPow;
+import static mechanisms.Settings.RGBCOLOR;
 import static mechanisms.Settings.SweMax;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -45,7 +46,7 @@ public class EliOp extends LinearOpMode {
 
 
         operator = gamepad2;
-        driver = gamepad2;
+        driver = gamepad1;
         limelight.init(hardwareMap, driver,0);
         telemetry.addLine("Limelight initialized");
         turret.init(hardwareMap, driver);
@@ -59,6 +60,8 @@ public class EliOp extends LinearOpMode {
                 SweMax, // max motor power limit
                 telemetry
         );
+        rgb.init(hardwareMap,driver);
+        rgb.setRgb(1);
         drive.zeroModules();
         waitForStart();
         limelight.start();
@@ -80,7 +83,7 @@ public class EliOp extends LinearOpMode {
             if (manualTurretActive) {
                 // Turret
                 turret.controls();
-            } else {
+            } if(autoTrackToggle) {
                 LLResult llResult = limelight.getResult();
                 if (llResult != null && llResult.isValid()) {
                     double tx = llResult.getTx(); // horizontal offset
@@ -134,9 +137,9 @@ public class EliOp extends LinearOpMode {
                 telemetry.addLine("No valid Limelight target"); }
             telemetry.addData("Motor Speed: ", flywheel.flywheel.getPower());
             telemetry.update();
-            double forward = -gamepad2.left_stick_y;
-            double strafe = gamepad2.left_stick_x;
-            double turn = gamepad2.right_stick_x;
+            double forward = gamepad2.left_stick_y;
+            double strafe = -gamepad2.left_stick_x;
+            double turn = -gamepad2.right_stick_x;
 
             double throttle = 1.0;
             drive.drive(forward, strafe, turn, throttle);

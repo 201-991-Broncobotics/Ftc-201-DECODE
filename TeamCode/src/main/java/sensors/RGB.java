@@ -13,7 +13,7 @@ public class RGB {
         Rgb = hwdM.get(Servo.class, "rgb");
 
     }
-    public void setRgb() {
-        Rgb.setPosition(RGBCOLOR);
+    public void setRgb(double rgb) {
+        Rgb.setPosition(rgb);
     }
 }
