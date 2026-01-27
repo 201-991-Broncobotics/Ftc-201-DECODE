@@ -1,5 +1,6 @@
 package mechanisms;
 
+import static java.lang.Thread.sleep;
 import static mechanisms.Settings.IntakePowe;
 import static mechanisms.Settings.HighRolPow;
 import static mechanisms.Settings.redownpos;
@@ -12,21 +13,22 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+// Controls: B = All intake rolles; R1 = Ball flick A= Intake
 public class Intake {
-    // Hardware
+    boolean intaketoggle, lastAPressed, lastBPressed, rollertoggle, ballflickup, lastXPressed = false;
+    boolean autotracktoggle, lastbumppressed = false;
+
+    // 🔹 New variables for release servo
+    private boolean releaseToggle = false;
+    private boolean lastYPressed = false;
+    Gamepad Controller;
     private DcMotor intake, highroll;
     private Servo ballflick;
     private CRServo lowerroller1, lowerroller2;
-    private Servo SortServo, realeaseservo;
-
-    // State Variables
     private ElapsedTime shootTimer = new ElapsedTime();
     private int shootState = 0;
     private boolean shooting = false;
-    private boolean releaseToggle = false;
-    private boolean lastYPressed = false;
-
-    Gamepad Controller;
+    private Servo SortServo, realeaseservo; // relS
 
     public void init(HardwareMap hwdM, Gamepad controller) {
         intake = hwdM.get(DcMotor.class, "intM");
@@ -51,54 +53,47 @@ public class Intake {
         ballflick.setPosition(pos);
     }
 
+
     public void lowerRollers(double power) {
         lowerroller1.setPower(power);
         lowerroller2.setPower(power);
     }
 
+    public void release(double pos) {
+        realeaseservo.setPosition(pos);
+    }
+
     public void control() {
-        // --- INTAKE CONTROLS ---
+
         if (Controller.a) {
-            // Holding A: Run Intake
             intake.setPower(IntakePowe);
             setHighroll(HighRolPow);
             lowerRollers(-1);
         }
-        else if (Controller.x) {
-            // Holding X: Reverse Intake
-            intake.setPower(-IntakePowe);
-            lowerRollers(1);
-            setHighroll(-HighRolPow);
+        if (Controller.aWasReleased()) {
+            intake.setPower(1);
+            setHighroll(.5);
+            lowerRollers(-.3);
         }
-        else if (!shooting) {
-            // If not holding A, not holding X, and not shooting cycle: STOP
-            intake.setPower(0);     // <--- FIXED: Was 1 in your code
-            setHighroll(0);         // <--- FIXED: Was .5 in your code
-            lowerRollers(0);        // <--- FIXED: Was -.3 in your code
-            realeaseservo.setPosition(redownpos);
-        }
-
-        // --- SHOOTING SEQUENCE (Button B) ---
         if (Controller.b && !shooting) {
             shooting = true;
             shootState = 0;
             shootTimer.reset();
         }
 
-        // Cancel shot if B is released?
-        // (Based on your logic, you seemed to want it to only run while B is held,
-        // but usually shooting is a "One Press" action. I kept your logic here.)
         if (!Controller.b) {
             shooting = false;
             shootState = 0;
-            setBallflick(90);   // Reset flicker
-            // We rely on the "else" block in the Intake Controls above to stop the motors
+            setBallflick(90);   // Push down
+            setIntake(0);
         }
 
+// State machine to simulate the while-loop behavior safely
         if (shooting) {
             switch (shootState) {
                 case 0:
-                    setBallflick(-20);       // Flick Up
+                    // Step 1: start cycle
+                    setBallflick(0);       // push up
                     setHighroll(HighRolPow);
                     setIntake(0);
                     shootTimer.reset();
@@ -106,21 +101,70 @@ public class Intake {
                     break;
 
                 case 1:
+                    // Step 2: wait 100ms
                     if (shootTimer.milliseconds() >= 200) {
-                        setBallflick(80);   // Flick Down
+                        setBallflick(90);   // push down
                         shootTimer.reset();
                         shootState = 2;
                     }
                     break;
 
                 case 2:
+                    // Step 3: wait 250ms before next cycle
                     if (shootTimer.milliseconds() >= 450) {
-                        shootState = 0; // Repeat
+                        shootState = 0; // loop back to step 1
                     }
                     break;
             }
-            lowerRollers(-1);
-            realeaseservo.setPosition(reuppos);
+        }
+        if (Controller.x) {
+            setIntake(-IntakePowe);
+            lowerRollers(1);
+            setHighroll(-HighRolPow);
+        }
+        if (Controller.y && !lastYPressed) {
+            releaseToggle = !releaseToggle;
+            if (releaseToggle) {
+                realeaseservo.setPosition(reuppos); // move up 90° (adjust if needed)
+                SortServo.setPosition(180);
+            } else {
+                realeaseservo.setPosition(redownpos); // back down
+            }
+        }
+        lastYPressed = Controller.y;
+    }
+
+     // set true when you want to start auto shooting
+
+    public void runAutoShooter(boolean autoshoot) {
+        if(autoshoot){
+            switch (shootState) {
+                case 0:
+                    // Step 1: start cycle
+                    setBallflick(90);            // push up
+                    setHighroll(HighRolPow);
+                    setIntake(1);
+                    shootTimer.reset();
+                    shootState = 1;
+                    break;
+
+                case 1:
+                    // Step 2: wait 200ms
+                    if (shootTimer.milliseconds() >= 200) {
+                        setBallflick(90);       // push down
+                        shootTimer.reset();
+                        shootState = 2;
+                    }
+                    break;
+
+                case 2:
+                    // Step 3: wait 450ms, then loop
+                    if (shootTimer.milliseconds() >= 450) {
+                        shootState = 0;         // repeat cycle
+                    }
+                    break;
+            }
         }
     }
 }
+
