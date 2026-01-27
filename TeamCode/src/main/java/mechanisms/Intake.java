@@ -130,8 +130,41 @@ public class Intake {
             } else {
                 realeaseservo.setPosition(redownpos); // back down
             }
+        }
+        lastYPressed = Controller.y;
+    }
+
+     // set true when you want to start auto shooting
+
+    public void runAutoShooter(boolean autoshoot) {
+        if(autoshoot){
+            switch (shootState) {
+                case 0:
+                    // Step 1: start cycle
+                    setBallflick(90);            // push up
+                    setHighroll(HighRolPow);
+                    setIntake(1);
+                    shootTimer.reset();
+                    shootState = 1;
+                    break;
+
+                case 1:
+                    // Step 2: wait 200ms
+                    if (shootTimer.milliseconds() >= 200) {
+                        setBallflick(90);       // push down
+                        shootTimer.reset();
+                        shootState = 2;
+                    }
+                    break;
+
+                case 2:
+                    // Step 3: wait 450ms, then loop
+                    if (shootTimer.milliseconds() >= 450) {
+                        shootState = 0;         // repeat cycle
+                    }
+                    break;
             }
-            lastYPressed = Controller.y;
         }
     }
+}
 
