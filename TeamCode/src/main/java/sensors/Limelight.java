@@ -13,23 +13,31 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import mechanisms.Settings;
 import mechanisms.Turret;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
+import java.util.List;
 
 
 public class Limelight {
     boolean autotracktoggle, lastbumppressed = false;
     Gamepad Controller;
     private Limelight3A limelight;
+    private LLResult results;
+    public Position robotPos = new Position();
     private IMU imu;
     private Turret turret;
+
 
     public void init(HardwareMap hwdM, Gamepad controller, int pipeline) {
         limelight = hwdM.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(pipeline);
+        results = limelight.getLatestResult();
         RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.FORWARD, RevHubOrientationOnRobot.UsbFacingDirection.DOWN);
         Controller = controller;
-
 
     }
 
@@ -45,5 +53,45 @@ public class Limelight {
             Settings.turret_I,
             Settings.turret_D,
             0.0);
+
+    public double getDistance(){
+        results = limelight.getLatestResult();
+        List<LLResultTypes.FiducialResult> fids = results.getFiducialResults();
+
+        for (LLResultTypes.FiducialResult f : fids){
+            int id = f.getFiducialId();
+            Pose3D pos = f.getTargetPoseRobotSpace();
+            robotPos = pos.getPosition();
+
+            return Math.hypot(robotPos.x, robotPos.z);
+
+        }
+
+
+
+        /*if (!fids.isEmpty()) {
+            robotPos = fids.get(0).getTargetPoseRobotSpace().getPosition();
+
+            return Math.hypot(robotPos.x, robotPos.z);
+
+        }
+
+         */
+
+
+
+        if (fids.isEmpty()) {
+            return Double.NaN; // or -1
+        }
+
+        return Double.NaN;
+
+    }
+
+    public double predictVelocity(double dist){
+
+        return 0; //need quadratic function
+    }
+
 }
 

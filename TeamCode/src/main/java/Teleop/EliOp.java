@@ -4,6 +4,7 @@ package Teleop;
 import static mechanisms.Settings.HighRolPow;
 import static mechanisms.Settings.RGBCOLOR;
 import static mechanisms.Settings.SweMax;
+import static mechanisms.Settings.padle;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -37,8 +38,6 @@ public class EliOp extends LinearOpMode {
     boolean autoTrackToggle = false;
     boolean lastR3Pressed = false;
 
-
-
     ColorSensor cs0;
 
     @Override
@@ -68,7 +67,7 @@ public class EliOp extends LinearOpMode {
         while (opModeIsActive()) {
             //Micah's thing
             intake.setIntake(0);
-            intake.setHighroll(-0.1);
+            intake.setHighroll(0);
             intake.lowerRollers(0);
 
             // ---------- Toggle Auto-Track ----------
@@ -127,7 +126,7 @@ public class EliOp extends LinearOpMode {
 
 
             intake.control();
-            telemetry.addData("Flywheel Volcity", flywheel.flywheel.getPower());
+            telemetry.addData("Flywheel Velocity", flywheel.flywheel.getPower());
             LLResult llResult = limelight.getResult();
             if (llResult != null && llResult.isValid()) {
                 telemetry.addData("Limelight Tx", llResult.getTx());
@@ -136,10 +135,16 @@ public class EliOp extends LinearOpMode {
             } else {
                 telemetry.addLine("No valid Limelight target"); }
             telemetry.addData("Motor Speed: ", flywheel.flywheel.getPower());
+            telemetry.addData("Limelight Distance", limelight.getDistance());
+            telemetry.addData("Robot X", limelight.robotPos.x);
+            telemetry.addData("Robot Z", limelight.robotPos.z);
+            if (llResult != null) {
+                telemetry.addData("FPS", llResult.getTimestamp());
+            }
             telemetry.update();
             double forward = gamepad2.left_stick_y;
-            double strafe = -gamepad2.left_stick_x;
-            double turn = -gamepad2.right_stick_x;
+            double strafe = gamepad2.left_stick_x;
+            double turn = gamepad2.right_stick_x;
 
             double throttle = 1.0;
             drive.drive(forward, strafe, turn, throttle);

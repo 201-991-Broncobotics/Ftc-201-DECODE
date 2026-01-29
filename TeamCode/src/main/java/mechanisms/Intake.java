@@ -28,7 +28,7 @@ public class Intake {
     private ElapsedTime shootTimer = new ElapsedTime();
     private int shootState = 0;
     private boolean shooting = false;
-    private Servo SortServo, realeaseservo; // relS
+    private Servo SortServo, realeaseservo,paddle; // relS
 
     public void init(HardwareMap hwdM, Gamepad controller) {
         intake = hwdM.get(DcMotor.class, "intM");
@@ -72,13 +72,17 @@ public class Intake {
         }
         if (Controller.aWasReleased()) {
             intake.setPower(1);
-            setHighroll(.5);
+            setHighroll(1);
             lowerRollers(-.3);
         }
         if (Controller.b && !shooting) {
             shooting = true;
+            setIntake(-1);
             shootState = 0;
             shootTimer.reset();
+            realeaseservo.setPosition(reuppos); // move up 90° (adjust if needed)
+            SortServo.setPosition(1);
+
         }
 
         if (!Controller.b) {
@@ -86,6 +90,8 @@ public class Intake {
             shootState = 0;
             setBallflick(90);   // Push down
             setIntake(0);
+            realeaseservo.setPosition(redownpos); // back down
+
         }
 
 // State machine to simulate the while-loop behavior safely
@@ -94,15 +100,14 @@ public class Intake {
                 case 0:
                     // Step 1: start cycle
                     setBallflick(0);       // push up
-                    setHighroll(HighRolPow);
-                    setIntake(0);
+                    setHighroll(0);
                     shootTimer.reset();
                     shootState = 1;
                     break;
 
                 case 1:
                     // Step 2: wait 100ms
-                    if (shootTimer.milliseconds() >= 200) {
+                    if (shootTimer.milliseconds() >= 250) {
                         setBallflick(90);   // push down
                         shootTimer.reset();
                         shootState = 2;
@@ -111,7 +116,7 @@ public class Intake {
 
                 case 2:
                     // Step 3: wait 250ms before next cycle
-                    if (shootTimer.milliseconds() >= 450) {
+                    if (shootTimer.milliseconds() >= 750) {
                         shootState = 0; // loop back to step 1
                     }
                     break;
@@ -122,7 +127,7 @@ public class Intake {
             lowerRollers(1);
             setHighroll(-HighRolPow);
         }
-        if (Controller.y && !lastYPressed) {
+        /*if (Controller.b && !lastYPressed) {
             releaseToggle = !releaseToggle;
             if (releaseToggle) {
                 realeaseservo.setPosition(reuppos); // move up 90° (adjust if needed)
@@ -131,7 +136,9 @@ public class Intake {
                 realeaseservo.setPosition(redownpos); // back down
             }
         }
-        lastYPressed = Controller.y;
+        lastYPressed = Controller.b;
+
+         */
     }
 
      // set true when you want to start auto shooting
@@ -141,9 +148,9 @@ public class Intake {
             switch (shootState) {
                 case 0:
                     // Step 1: start cycle
-                    setBallflick(90);            // push up
+                    setBallflick(0);            // push up
                     setHighroll(HighRolPow);
-                    setIntake(1);
+                    setIntake(-1);
                     shootTimer.reset();
                     shootState = 1;
                     break;
