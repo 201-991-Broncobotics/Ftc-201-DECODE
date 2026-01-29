@@ -1,37 +1,44 @@
 package sensors;
 
+
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.Range;
-
-import Diffy.PIDController; // Make sure this import matches your PID file location
+import com.qualcomm.robotcore.hardware.IMU;
 import mechanisms.Settings;
+import mechanisms.Turret;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
+import java.util.List;
+
 
 public class Limelight {
-    private Limelight3A limelight;
+    boolean autotracktoggle, lastbumppressed = false;
     Gamepad Controller;
+    private Limelight3A limelight;
+    private LLResult results;
+    public Position robotPos = new Position();
+    private IMU imu;
+    private Turret turret;
 
-    // Use the PIDController class you provided
-    public final PIDController turretPID = new PIDController(
-            Settings.turret_P,
-            Settings.turret_I,
-            Settings.turret_D,
-            () -> 0.0 // Placeholder supplier, we will feed error manually or set target
-    );
 
     public void init(HardwareMap hwdM, Gamepad controller, int pipeline) {
         limelight = hwdM.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(pipeline);
-        limelight.setPollRateHz(100);
+        results = limelight.getLatestResult();
+        RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.FORWARD, RevHubOrientationOnRobot.UsbFacingDirection.DOWN);
         Controller = controller;
 
-        // Configure PID
-        turretPID.setTolerance(0.5); // Allow 0.5 degree error
     }
 
     public void start() {
@@ -41,29 +48,50 @@ public class Limelight {
     public LLResult getResult() {
         return limelight.getLatestResult();
     }
+    public final PIDFController turretPID = new PIDFController(
+            Settings.turret_P,
+            Settings.turret_I,
+            Settings.turret_D,
+            0.0);
 
-    /**
-     * Calculates distance to target in inches based on Limelight Ty (vertical offset).
-     */
-    public double getDistance(double ty) {
-        // formula: d = (h_target - h_cam) / tan(a_mount + ty)
-        double angleToGoalDegrees = Settings.limelightMountAngleDegrees + ty;
-        double angleToGoalRadians = Math.toRadians(angleToGoalDegrees);
+    public double getDistance(){
+        results = limelight.getLatestResult();
+        List<LLResultTypes.FiducialResult> fids = results.getFiducialResults();
 
-        double heightDiff = Settings.targetHeightInches - Settings.cameraHeightInches;
+        for (LLResultTypes.FiducialResult f : fids){
+            int id = f.getFiducialId();
+            Pose3D pos = f.getTargetPoseRobotSpace();
+            robotPos = pos.getPosition();
 
-        // Avoid divide by zero if looking straight at horizon
-        if (Math.tan(angleToGoalRadians) == 0) return 0;
+            return Math.hypot(robotPos.x, robotPos.z);
 
-        return heightDiff / Math.tan(angleToGoalRadians);
+        }
+
+
+
+        /*if (!fids.isEmpty()) {
+            robotPos = fids.get(0).getTargetPoseRobotSpace().getPosition();
+
+            return Math.hypot(robotPos.x, robotPos.z);
+
+        }
+
+         */
+
+
+
+        if (fids.isEmpty()) {
+            return Double.NaN; // or -1
+        }
+
+        return Double.NaN;
+
     }
 
-    /**
-     * Returns the ideal flywheel power based on distance using a linear regression.
-     */
-    public double calculateAutoFlywheelPower(double distanceInches) {
-        // Power = Base + (Distance * Factor)
-        double targetPower = Settings.FlywheelBasePower + (distanceInches * Settings.FlywheelDistMult);
-        return Range.clip(targetPower, 0, 1);
+    public double predictVelocity(double dist){
+
+        return 0; //need quadratic function
     }
+
 }
+

@@ -34,12 +34,14 @@ public class Actually_Good_Auto extends LinearOpMode {
         flywheel.init(hardwareMap, dummy);
         intake.init(hardwareMap, dummy);
         limelight.init(hardwareMap, dummy, 0);
-        waitForStart();
         intake.setBallflick(90);            // push up
 
+        waitForStart();
         flywheel.setFlywheel(0.6);
-        sleep(1000);
+        sleep(10000);
         intake.runAutoShooter(true);
+        intake.runAutoShooter(true);
+        sleep(20000);
     }
 }
 

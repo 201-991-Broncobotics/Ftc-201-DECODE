@@ -1,157 +1,154 @@
+
 package Teleop;
 
+import static mechanisms.Settings.HighRolPow;
+import static mechanisms.Settings.RGBCOLOR;
 import static mechanisms.Settings.SweMax;
+import static mechanisms.Settings.padle;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.VoltageSensor; // Import this
+import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.RobotHardware;
+
+import Diffy.DiffySwerveKinematics;
 import mechanisms.Flywheel;
 import mechanisms.Intake;
 import mechanisms.Settings;
 import mechanisms.Turret;
 import sensors.Limelight;
 import sensors.RGB;
-import Diffy.DiffySwerveKinematics;
 
-@TeleOp(name = "Eli Op Final", group = "Concept")
+@TeleOp(name = "Eli Op", group = "Concept")
 public class EliOp extends LinearOpMode {
-
-    // Mechanisms
     DiffySwerveKinematics drive;
-    Turret turret = new Turret();
+
+    Gamepad operator, driver;
+    mechanisms.Turret turret = new mechanisms.Turret();
     Flywheel flywheel = new Flywheel();
     Intake intake = new Intake();
     RGB rgb = new RGB();
-    Limelight limelight = new Limelight();
-
-    // Inputs & State
-    Gamepad operator, driver;
+    private IMU imu;
+    private Limelight limelight = new Limelight();
     boolean autoTrackToggle = false;
     boolean lastR3Pressed = false;
 
-    // Logic State
-    boolean isRedAlliance = true;
-    boolean isShooting = false;
+    ColorSensor cs0;
 
     @Override
     public void runOpMode() {
+
+
         operator = gamepad2;
         driver = gamepad1;
-
-        // 1. Hardware Init
-        limelight.init(hardwareMap, driver, 0);
+        limelight.init(hardwareMap, driver,0);
+        telemetry.addLine("Limelight initialized");
         turret.init(hardwareMap, driver);
         flywheel.init(hardwareMap, driver);
         intake.init(hardwareMap, driver);
-        rgb.init(hardwareMap, driver);
-
         drive = new DiffySwerveKinematics(
                 hardwareMap.get(DcMotorEx.class, "lSwe0"),
                 hardwareMap.get(DcMotorEx.class, "lSwe1"),
                 hardwareMap.get(DcMotorEx.class, "rSwe1"),
                 hardwareMap.get(DcMotorEx.class, "rSwe0"),
-                SweMax,
+                SweMax, // max motor power limit
                 telemetry
         );
+        rgb.init(hardwareMap,driver);
+        rgb.setRgb(1);
         drive.zeroModules();
-
-        // --- BATTERY SENSOR SETUP ---
-        // Get the voltage sensor (usually on the Control Hub)
-        VoltageSensor batterySensor = hardwareMap.voltageSensor.iterator().next();
-
-        // 2. Alliance Selection (Init Loop)
-        while (opModeInInit()) {
-            telemetry.addData("Alliance", isRedAlliance ? "RED" : "BLUE");
-            telemetry.addData("Instructions", "Press X for Blue, B for Red");
-            telemetry.update();
-
-            if (gamepad1.x) isRedAlliance = false;
-            if (gamepad1.b) isRedAlliance = true;
-
-            if (isRedAlliance) rgb.showRedWait();
-            else rgb.showBlueWait();
-        }
-
+        waitForStart();
         limelight.start();
-
-        // 3. Main Loop
         while (opModeIsActive()) {
-            // Read Battery Voltage
-            double currentVoltage = batterySensor.getVoltage();
+            //Micah's thing
+            intake.setIntake(0);
+            intake.setHighroll(0);
+            intake.lowerRollers(0);
 
-            // --- INPUTS ---
+            // ---------- Toggle Auto-Track ----------
             if (driver.right_stick_button && !lastR3Pressed) {
                 autoTrackToggle = !autoTrackToggle;
             }
             lastR3Pressed = driver.right_stick_button;
 
-            // --- VISION & AUTO-AIM ---
-            LLResult llResult = limelight.getResult();
-            double autoFlywheelPower = -1.0;
-            double tx = 0;
-            boolean targetFound = false;
+            // ---------- Turret Control ----------
+            boolean manualTurretActive = driver.right_trigger > 0.1 || driver.left_trigger > 0.1;
 
-            if (autoTrackToggle && llResult != null && llResult.isValid()) {
-                targetFound = true;
-                tx = llResult.getTx();
-                double ty = llResult.getTy();
+            if (manualTurretActive) {
+                // Turret
+                turret.controls();
+            } if(autoTrackToggle) {
+                LLResult llResult = limelight.getResult();
+                if (llResult != null && llResult.isValid()) {
+                    double tx = llResult.getTx(); // horizontal offset
 
-                double distance = limelight.getDistance(ty);
-                autoFlywheelPower = limelight.calculateAutoFlywheelPower(distance);
+                    // COMMENT THIS OUT WHEN TUNING IS DONE
+                    limelight.turretPID.setPIDF(
+                            Settings.turret_P,
+                            Settings.turret_I,
+                            Settings.turret_D,
+                            0.0
+                    );
 
-                telemetry.addData("AutoAim", "Dist: %.1f in | Pwr: %.2f", distance, autoFlywheelPower);
+                    // Use PID to minimize tx
+                    double power = limelight.turretPID.calculate(tx);
+                    telemetry.addData("PID power:", power);
+                    // Clamp power to [-1, 1]
+                    power = power > 0 ? Math.min(1, power) : Math.max(-1, power);
+                    turret.setTurrets(power,power);
+
+                    // ELI'S ORIGINAL:
+                    // double deadzone = 1.0;
+                    // double power = 0.2;
+                    // if (tx > deadzone) robot.turret.setPower(power);
+                    // else if (tx < -deadzone) robot.turret.setPower(-power);
+                    // else robot.turret.setPower(0);
+
+                    telemetry.addData("AutoTrack Tx", tx);
+                } else {
+                    turret.setTurrets(0,0);
+                    telemetry.addLine("No valid Limelight target");
+
+                }
             }
+            //  else {
+            //      robot.turret.setPower(0); // stop if no manual or auto-track
+            //  }
 
-            // --- MECHANISMS ---
-            flywheel.controls(autoFlywheelPower);
+
+            turret.controls();
+            flywheel.controls();
+
+
             intake.control();
-
-            // --- TURRET LOGIC (Fixed for Battery) ---
-            double turretPower = 0;
-            boolean manualTurret = (driver.right_trigger > 0.1) || (driver.left_trigger > 0.1);
-
-            if (manualTurret) {
-                if (driver.right_trigger > 0.1) turretPower = 0.25;
-                else turretPower = -0.25;
-            } else if (autoTrackToggle && targetFound) {
-                limelight.turretPID.kP = Settings.turret_P;
-                limelight.turretPID.setTarget(0);
-                double pidOut = limelight.turretPID.getPower(tx);
-                turretPower = Math.max(-1, Math.min(1, pidOut));
-            }
-
-            // Use the new Voltage Compensated method
-            turret.setTurretsWithVoltageComp(turretPower, currentVoltage);
-
-            // --- RGB LOGIC ---
-            boolean shootingTrigger = driver.b || operator.b;
-            boolean flywheelReady = flywheel.flywheeltoggle && flywheel.flywheel.getPower() > 0;
-
-            if (driver.back) {
-                rgb.showRainbow();
-            } else if (shootingTrigger) {
-                if (isRedAlliance) rgb.showRedShoot();
-                else rgb.showBlueShoot();
-            } else if (flywheelReady) {
-                if (isRedAlliance) rgb.showRedReady();
-                else rgb.showBlueReady();
+            telemetry.addData("Flywheel Velocity", flywheel.flywheel.getPower());
+            LLResult llResult = limelight.getResult();
+            if (llResult != null && llResult.isValid()) {
+                telemetry.addData("Limelight Tx", llResult.getTx());
+                telemetry.addData("Limelight Ty", llResult.getTy());
+                telemetry.addData("Limelight Ta", llResult.getTa());
             } else {
-                if (isRedAlliance) rgb.showRedDefault();
-                else rgb.showBlueDefault();
+                telemetry.addLine("No valid Limelight target"); }
+            telemetry.addData("Motor Speed: ", flywheel.flywheel.getPower());
+            telemetry.addData("Limelight Distance", limelight.getDistance());
+            telemetry.addData("Robot X", limelight.robotPos.x);
+            telemetry.addData("Robot Z", limelight.robotPos.z);
+            if (llResult != null) {
+                telemetry.addData("FPS", llResult.getTimestamp());
             }
-
-            // --- DRIVE ---
-            drive.drive(-driver.left_stick_y, driver.left_stick_x, driver.right_stick_x, 1.0);
-
-            // --- TELEMETRY ---
-            telemetry.addData("Voltage", "%.1f V", currentVoltage);
-            telemetry.addData("Alliance", isRedAlliance ? "RED" : "BLUE");
-            telemetry.addData("Mode", autoTrackToggle ? "AUTO" : "MANUAL");
             telemetry.update();
+            double forward = gamepad2.left_stick_y;
+            double strafe = gamepad2.left_stick_x;
+            double turn = gamepad2.right_stick_x;
+
+            double throttle = 1.0;
+            drive.drive(forward, strafe, turn, throttle);
+            }
         }
     }
-}
+
