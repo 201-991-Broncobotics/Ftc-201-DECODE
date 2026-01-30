@@ -100,7 +100,7 @@ public class Intake {
                 case 0:
                     // Step 1: start cycle
                     setBallflick(0);       // push up
-                    setHighroll(0);
+                    setHighroll(1);
                     shootTimer.reset();
                     shootState = 1;
                     break;
@@ -109,6 +109,7 @@ public class Intake {
                     // Step 2: wait 100ms
                     if (shootTimer.milliseconds() >= 250) {
                         setBallflick(90);   // push down
+                        setHighroll(0);
                         shootTimer.reset();
                         shootState = 2;
                     }
@@ -127,7 +128,7 @@ public class Intake {
             lowerRollers(1);
             setHighroll(-HighRolPow);
         }
-        /*if (Controller.b && !lastYPressed) {
+        if (Controller.b && !lastYPressed) {
             releaseToggle = !releaseToggle;
             if (releaseToggle) {
                 realeaseservo.setPosition(reuppos); // move up 90° (adjust if needed)
@@ -138,7 +139,7 @@ public class Intake {
         }
         lastYPressed = Controller.b;
 
-         */
+
     }
 
      // set true when you want to start auto shooting

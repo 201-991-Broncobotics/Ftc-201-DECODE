@@ -38,14 +38,17 @@ public class Turret {
         } else if (Controller.left_trigger > 0.1) {
             setTurrets(-0.15, -0.15); // Spin forward based on trigger pressure
 
-               } else {
-              setTurrets(0, 0);         }
-
+        } else {
+            setTurrets(0, 0);
         }
-        // public void autoTrack(double power) {
-        // turret1.setPower(power);
-        //  turret2.setPower(power);
+
     }
+
+    public void autoTrack(double power) {
+        turret1.setPower(power);
+        turret2.setPower(power);
+    }
+}
 
 
 // }

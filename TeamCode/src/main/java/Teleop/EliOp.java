@@ -76,6 +76,31 @@ public class EliOp extends LinearOpMode {
             }
             lastR3Pressed = driver.right_stick_button;
 
+            // ---------- Turret Control ----------
+            boolean manualTurretActive = driver.right_trigger > 0.1 || driver.left_trigger > 0.1;
+
+            if (manualTurretActive) {
+                turret.controls(); // manual override
+            } else if (autoTrackToggle) {
+                LLResult llResult = limelight.getResult();
+                if (llResult != null && llResult.isValid()) {
+                    double tx = llResult.getTx(); // horizontal offset
+                    double deadzone = 1.0;
+                    double power = 0.4;
+
+                    if (tx > deadzone) turret.autoTrack(power);
+                    else if (tx < -deadzone) turret.autoTrack(-power);
+                    else turret.autoTrack(0);
+
+                    telemetry.addData("AutoTrack Tx", tx);
+                } else {
+                    turret.autoTrack(0);
+                    telemetry.addLine("No valid Limelight target");
+                }
+            } else {
+                turret.autoTrack(0); // stop if no manual or auto-track
+            }
+
             turret.controls();
             flywheel.controls();
 
