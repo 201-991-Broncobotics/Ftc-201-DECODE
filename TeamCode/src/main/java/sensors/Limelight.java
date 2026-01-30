@@ -48,17 +48,19 @@ public class Limelight {
     public LLResult getResult() {
         return limelight.getLatestResult();
     }
+
     public final PIDFController turretPID = new PIDFController(
             Settings.turret_P,
             Settings.turret_I,
             Settings.turret_D,
             0.0);
 
-    public double getDistance(){
+    public double getDistance() {
         results = limelight.getLatestResult();
+
         List<LLResultTypes.FiducialResult> fids = results.getFiducialResults();
 
-        for (LLResultTypes.FiducialResult f : fids){
+        for (LLResultTypes.FiducialResult f : fids) {
             int id = f.getFiducialId();
             Pose3D pos = f.getTargetPoseRobotSpace();
             robotPos = pos.getPosition();
@@ -66,32 +68,21 @@ public class Limelight {
             return Math.hypot(robotPos.x, robotPos.z);
 
         }
-
-
-
-        /*if (!fids.isEmpty()) {
-            robotPos = fids.get(0).getTargetPoseRobotSpace().getPosition();
-
-            return Math.hypot(robotPos.x, robotPos.z);
-
-        }
-
-         */
-
-
+        if (results.getFiducialResults().isEmpty()) {
+            return 0; }
 
         if (fids.isEmpty()) {
-            return Double.NaN; // or -1
-        }
+            return 0; // or -1
+            }
 
-        return Double.NaN;
+        return 0;
 
     }
-
-    public double predictVelocity(double dist){
-
-        return 0; //need quadratic function
+    public double predictVelocity(double dist) {
+        results = limelight.getLatestResult();
+        if (dist != 0) {
+            return (92.56652 * Math.pow(dist, 2)) - (379.27046 * dist) + 3505.80142;}
+        return 0;
     }
-
 }
 
