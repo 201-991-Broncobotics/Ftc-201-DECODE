@@ -84,14 +84,14 @@ public class Flywheel {
     }
 
     public void setFlywheel(double vel) {
-        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Settings.flykP, Settings.flykI, Settings.flykD, 0));
-        flywheel.setVelocity((predictVelocity(getDistance())) / 60 * 20);
+        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Settings.flykP, Settings.flykI, Settings.flykD, 11.7));
+        flywheel.setVelocity((predictVelocity(getDistance())) *28 / 60);
     }
 
     public void autoDistance(){
         double predict = getDistance();
-        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Settings.flykP, Settings.flykI, Settings.flykD, 0));
-        flywheel.setVelocity((predictVelocity(predict)) / 60 * 20);
+        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Settings.flykP, Settings.flykI, Settings.flykD, 11.7));
+        flywheel.setVelocity((predictVelocity(predict)) *28 / 60);
     }
 
     public void controls() {
