@@ -20,8 +20,6 @@ public class Settings {
     public static  double padle = 0;
     public static double farvel = 4500;
     public static double closevel = 1800;
-    public static double flyw_D = 0;
-    public static double integralSum = 0;
 
     public static double flykP = 1.2;
 
@@ -31,7 +29,7 @@ public class Settings {
 
     public static double flyVelocity = 37500;
 
-
+    public static int pipeline = 0;
 
 }
 

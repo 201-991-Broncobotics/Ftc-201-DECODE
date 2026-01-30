@@ -63,13 +63,13 @@ public class Basic_PGP_Auto extends LinearOpMode {
                 double deadzone = 1.0;
                 double power = 0.2;
 
-                if (tx > deadzone) turret.autoTrack(power);
-                else if (tx < -deadzone) turret.autoTrack(-power);
-                else turret.autoTrack(0);
+               // if (tx > deadzone) turret.autoTrack(power);
+              //  else if (tx < -deadzone) turret.autoTrack(-power);
+              //  else turret.autoTrack(0);
 
                 telemetry.addData("AutoTrack Tx", tx);
             } else {
-                turret.autoTrack(0);
+              //  turret.autoTrack(0);
                 telemetry.addLine("No valid Limelight target");
             }
             telemetry.update();

@@ -54,7 +54,7 @@ public class BlueOp extends LinearOpMode {
             boolean manualTurretActive = driver.right_trigger > 0.1 || driver.left_trigger > 0.1;
 
             if (manualTurretActive) {
-                turret.controls(); // manual override
+              //  turret.controls(); // manual override
             } else if (autoTrackToggle) {
                 LLResult llResult = limelight.getResult();
                 if (llResult != null && llResult.isValid()) {
@@ -62,20 +62,20 @@ public class BlueOp extends LinearOpMode {
                     double ta = llResult.getTa();
                     double deadzone = 1.0;
                     double power = 0.2;
-                    if (tx > deadzone) turret.autoTrack(power);
-                    else if (tx < -deadzone) turret.autoTrack(-power);
-                    else turret.autoTrack(0);
+                   // if (tx > deadzone) turret.autoTrack(power);
+                  //  else if (tx < -deadzone) turret.autoTrack(-power);
+                 //   else turret.autoTrack(0);
 
                     telemetry.addData("AutoTrack Tx", tx);
                 } else {
-                    turret.autoTrack(0);
+                  //  turret.autoTrack(0);
                     telemetry.addLine("No valid Limelight target");
                 }
             } else {
-                turret.autoTrack(0); // stop if no manual or auto-track
+               // turret.autoTrack(0); // stop if no manual or auto-track
             }
 
-            turret.controls();
+           // turret.controls();
             flywheel.controls();
             drive.drive();
             intake.control();

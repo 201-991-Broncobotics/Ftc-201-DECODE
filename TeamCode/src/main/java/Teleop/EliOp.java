@@ -76,51 +76,6 @@ public class EliOp extends LinearOpMode {
             }
             lastR3Pressed = driver.right_stick_button;
 
-            // ---------- Turret Control ----------
-            boolean manualTurretActive = driver.right_trigger > 0.1 || driver.left_trigger > 0.1;
-
-            if (manualTurretActive) {
-                // Turret
-                turret.controls();
-            } if(autoTrackToggle) {
-                LLResult llResult = limelight.getResult();
-                if (llResult != null && llResult.isValid()) {
-                    double tx = llResult.getTx(); // horizontal offset
-
-                    // COMMENT THIS OUT WHEN TUNING IS DONE
-                    limelight.turretPID.setPIDF(
-                            Settings.turret_P,
-                            Settings.turret_I,
-                            Settings.turret_D,
-                            0.0
-                    );
-
-                    // Use PID to minimize tx
-                    double power = limelight.turretPID.calculate(tx);
-                    telemetry.addData("PID power:", power);
-                    // Clamp power to [-1, 1]
-                    power = power > 0 ? Math.min(1, power) : Math.max(-1, power);
-                    turret.setTurrets(power,power);
-
-                    // ELI'S ORIGINAL:
-                    // double deadzone = 1.0;
-                    // double power = 0.2;
-                    // if (tx > deadzone) robot.turret.setPower(power);
-                    // else if (tx < -deadzone) robot.turret.setPower(-power);
-                    // else robot.turret.setPower(0);
-
-                    telemetry.addData("AutoTrack Tx", tx);
-                } else {
-                    turret.setTurrets(0,0);
-                    telemetry.addLine("No valid Limelight target");
-
-                }
-            }
-            //  else {
-            //      robot.turret.setPower(0); // stop if no manual or auto-track
-            //  }
-
-
             turret.controls();
             flywheel.controls();
 
