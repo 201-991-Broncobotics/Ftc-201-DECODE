@@ -27,6 +27,8 @@ public class Actually_Good_Auto extends LinearOpMode {
     private Limelight limelight = new Limelight();
     private  DiffySwerveKinematics drive;
 
+
+
     @Override
     public void runOpMode(){
         Gamepad dummy = new Gamepad(); // no controller in autonomous
@@ -36,13 +38,14 @@ public class Actually_Good_Auto extends LinearOpMode {
         limelight.init(hardwareMap, dummy, 0);
         intake.setBallflick(90);            // push up
 
-        waitForStart();
-        flywheel.setFlywheel(limelight.predictVelocity(limelight.getDistance()));
-        sleep(10000);
-        intake.runAutoShooter(true);
+
+
+        while(opModeIsActive()){;
+        flywheel.autoDistance();
+        sleep(5000);
         intake.runAutoShooter(true);
         sleep(15000);
-        drive.drive(1,0,0,0.7);
+        drive.drive(1,0,0,0);
     }
 }
-
+}
