@@ -80,7 +80,7 @@ public class Flywheel {
     }
     public double predictVelocity(double dist) {
         results = limelight.getLatestResult();
-        return ((92.56652 * Math.pow(dist, 2)) - (379.27046 * dist) + 3505.80142);
+        return ((25.76269 * Math.pow(dist, 2)) - (53.03796 * dist) + 2344.01703);
     }
 
     public void setFlywheel(double vel) {
@@ -100,8 +100,8 @@ public class Flywheel {
         }
         lastBPressed = Controller.left_bumper;
         if (flywheeltoggle) {
-            //flywheel.setVelocity(Settings.flyVelocity / 60 * 20); // Set target speed
-            flywheel.setVelocity(flyVelocity);
+          //  flywheel.setVelocity(Settings.flyVelocity /60 * 28); // Set target speed
+            autoDistance();
         } else {
             flywheel.setVelocity(0); // Stop flywheel
         }
