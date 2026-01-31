@@ -8,17 +8,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Intake {
-    // internal variables
     private boolean shooting = false;
     private int shootState = 0;
     private ElapsedTime shootTimer = new ElapsedTime();
 
-    // Hardware
     Gamepad Controller;
     private DcMotor intake, highroll;
-    private Servo ballflick;
+    private Servo ballflick, SortServo, realeaseservo;
     private CRServo lowerroller1, lowerroller2;
-    private Servo SortServo, realeaseservo;
 
     public void init(HardwareMap hwdM, Gamepad controller) {
         intake = hwdM.get(DcMotor.class, "intM");
@@ -31,7 +28,6 @@ public class Intake {
         Controller = controller;
     }
 
-    // Helper methods to keep code clean
     public void setHighroll(double power) { highroll.setPower(power); }
     public void setIntake(double power) { intake.setPower(power); }
     public void setBallflick(double pos) { ballflick.setPosition(pos); }
@@ -41,69 +37,67 @@ public class Intake {
     }
 
     public void control() {
-        // --- 1. B BUTTON: Auto-Shooting Sequence (While Held) ---
-        if (Controller.b) {
+        // --- SHOOTING LOGIC (LATCHED) ---
+        if (Controller.b && !shooting) {
             shooting = true;
-            realeaseservo.setPosition(Settings.redownpos);
+            shootState = 0;
+            shootTimer.reset();
+        }
+
+        if (shooting) {
+            // Always hold these during the sequence
+            realeaseservo.setPosition(Settings.redownpos); // OPEN GATE
             SortServo.setPosition(1);
 
             switch (shootState) {
-                case 0:
-                    // Step 1: Flick Up
-                    setBallflick(0.43);
-                    shootTimer.reset();
-                    shootState = 1;
+                case 0: // NEW: Wait for Gate Servo to Open
+                    setBallflick(Settings.flick_DOWN); // Keep flicker out of way
+
+                    if (shootTimer.milliseconds() >= Settings.shoot_delay_ms) {
+                        shootTimer.reset();
+                        shootState = 1;
+                    }
                     break;
 
-                case 1:
-                    // Step 2: Wait 220ms then Flick Down
-                    setHighroll(0);
+                case 1: // Flick Up (Preparation)
+                    setBallflick(Settings.flick_UP);
+
                     if (shootTimer.milliseconds() >= 220) {
-                        setBallflick(0.95); // Push down
                         shootTimer.reset();
                         shootState = 2;
                     }
                     break;
 
-                case 2:
-                    // Step 3: Run Motors to shoot
+                case 2: // Flick Down & Shoot
+                    setBallflick(Settings.flick_DOWN);
                     setHighroll(-1);
                     setIntake(-1);
                     lowerRollers(-1);
 
-                    // Wait 800ms before looping back to start
                     if (shootTimer.milliseconds() >= 800) {
+                        shooting = false; // Sequence Done
                         shootState = 0;
                     }
                     break;
             }
         }
         else {
-            // --- B RELEASED: Reset Shooter ---
-            shooting = false;
-            shootState = 0;
-            setBallflick(0.95); // Reset flicker down
-            realeaseservo.setPosition(Settings.reuppos); // Reset release
-        }
+            // --- IDLE STATE ---
+            setBallflick(Settings.flick_DOWN);
+            realeaseservo.setPosition(Settings.reuppos); // CLOSE GATE
 
-        // --- 2. A & X BUTTONS: Manual Intake (Only if not shooting) ---
-        // If we are shooting (B is held), we ignore A and X so they don't fight.
-        if (!shooting) {
+            // --- MANUAL INTAKE ---
             if (Controller.a) {
-                // HOLD A: Run Intake
                 setIntake(Settings.IntakePowe);
                 setHighroll(Settings.HighRolPow);
                 lowerRollers(-1);
             }
             else if (Controller.x) {
-                // HOLD X: Reverse/Outtake
                 setIntake(-Settings.IntakePowe);
                 setHighroll(-Settings.HighRolPow);
                 lowerRollers(1);
             }
             else {
-                // RELEASED: STOP EVERYTHING
-                // This fixes the "keeps spinning" issue
                 setIntake(0);
                 setHighroll(0);
                 lowerRollers(0);

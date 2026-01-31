@@ -5,59 +5,62 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class Settings {
 
-    // --- 1. ROBOT SETUP ---
-    public static int numControllers = 1;
+    public static int numControllers = 2;
 
-    // --- 2. VISION CONSTANTS ---
-    // Measure these precisely!
+    // --- VISION ---
     public static double CAMERA_HEIGHT_IN = 16.5;
     public static double TARGET_HEIGHT_IN = 31.0;
     public static double CAMERA_ANGLE_DEG = 10.0;
+    public static double aimOffsetScale = 1.1;
     public static double CAMERA_OFFSET_FROM_CENTER = -5.0;
 
-    // Aim Offset: -1.1 means "Aim 11 deg left if tag is 10 deg right"
-    public static double aimOffsetScale = -1.1;
-
-    // --- 3. FLYWHEEL TUNING ---
-    // Quadratic: RPM = (A * dist^2) + (B * dist) + C
+    // --- FLYWHEEL FORMULA ---
+    // Equation: RPM = 17.37098 * dist + 1242.65941
     public static double fly_A = 0.0;
-    public static double fly_B = 0.0;
-    public static double fly_C = 3000.0;
+    public static double fly_B = 17.37098;
+    public static double fly_C = 1242.65941;
 
+    // --- FLYWHEEL PID ---
     public static double fly_targetRPM = 4500;
     public static double fly_ticksPerRev = 28.0;
-
-    // Flywheel PID
-    public static double fly_kP = 0.001;
-    public static double fly_kI = 0.0;
-    public static double fly_kD = 0.0;
+    public static double fly_kP = 5.0;
+    public static double fly_kI = 0.005;
+    public static double fly_kD = 0.05;
     public static double fly_pidDivisor = 1000.0;
 
-    // Flywheel Presets
-    public static double fly_farPreset = 4500;
-    public static double fly_closePreset = 1800;
+    public static double fly_farPreset = 2720;
+    public static double fly_closePreset = 2200;
+    public static double FlyPower = 0.5;
 
-    // --- 4. TURRET TUNING ---
+    // --- TURRET ---
     public static double tur_maxSpeed = 1.0;
     public static double tur_tolerance = 1.0;
-
     public static double tur_kP = -0.00185;
     public static double tur_kI = -0.01;
     public static double tur_kD = -0.00085;
     public static double tur_static_F = 0.07;
 
-    // --- 5. SWERVE & MISC ---
+    // UPDATED: Much slower search speed
+    public static double tur_searchSpeed = 0.15;
+
+    // --- SWERVE ---
     public static double SwerveKP = 0.04;
     public static double SwerveKD = 0.0005;
     public static double SweMax = 1;
 
-    // Legacy/Other
-    public static double FlyPower = 6000;
+    // --- INTAKE & SERVO POSITIONS ---
     public static double IntakePowe = -1;
     public static double HighRolPow = -1;
+
     public static double reuppos = 0.63;
     public static double redownpos = 1;
-    public static double RGBCOLOR = 0;
-    public static double padle = 0;
-    public static int pipeline = 0;
+
+    public static double flick_UP = 0.43;
+    public static double flick_DOWN = 0.95;
+
+    // Delay for release servo before shooting starts
+    public static int shoot_delay_ms = 250;
+
+    // --- RGB ---
+    public static double rgb_default = 1.0;
 }

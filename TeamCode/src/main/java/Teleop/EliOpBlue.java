@@ -20,8 +20,8 @@ import mechanisms.Turret;
 import sensors.Limelight;
 import sensors.RGB;
 
-@TeleOp(name = "Eli Op", group = "Concept")
-public class EliOp extends LinearOpMode {
+@TeleOp(name = "Eli Op BLUE", group = "Concept")
+public class EliOpBlue extends LinearOpMode {
     DiffySwerveKinematics drive;
     Gamepad mechController;
     Gamepad driveController;
@@ -45,7 +45,7 @@ public class EliOp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        Settings.aimOffsetScale = 1.1; // RED Offset
+        Settings.aimOffsetScale = -1.1; // BLUE Offset
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
@@ -57,7 +57,7 @@ public class EliOp extends LinearOpMode {
             mechController = gamepad2;
         }
 
-        limelight.init(hardwareMap, mechController, 0); // Pipeline 0
+        limelight.init(hardwareMap, mechController, 1); // Pipeline 1
         turret.init(hardwareMap, mechController);
         flywheel.init(hardwareMap, mechController, limelight);
         intake.init(hardwareMap, mechController);
@@ -75,7 +75,7 @@ public class EliOp extends LinearOpMode {
         );
         drive.zeroModules();
 
-        telemetry.addData("ALLIANCE", "RED");
+        telemetry.addData("ALLIANCE", "BLUE");
         waitForStart();
         limelight.start();
 
@@ -103,7 +103,8 @@ public class EliOp extends LinearOpMode {
                         Settings.fly_C;
             }
 
-             if (flywheelAutoMode) {
+            // Flywheel Logic
+            if (flywheelAutoMode) {
                 if (distance > 0) Settings.fly_targetRPM = formulaRPM;
                 if (mechController.dpad_up || mechController.dpad_down || mechController.dpad_left || mechController.dpad_right) {
                     flywheelAutoMode = false;
@@ -170,13 +171,13 @@ public class EliOp extends LinearOpMode {
                     // --- TARGET LOST (SEARCH MODE) ---
                     // FIXED: Only spin if we have seen it at least once
                     if (lastKnownTx == 0) {
-                        turret.autoTrack(0); // Stay still, haven't found it yet
+                        turret.autoTrack(0); // Stay still
                     }
                     else if (lastKnownTx > 0) {
-                        turret.autoTrack(-Settings.tur_searchSpeed); // Spin Left (slowly)
+                        turret.autoTrack(-Settings.tur_searchSpeed); // Spin Left
                     }
                     else {
-                        turret.autoTrack(Settings.tur_searchSpeed);  // Spin Right (slowly)
+                        turret.autoTrack(Settings.tur_searchSpeed);  // Spin Right
                     }
                 }
             } else if (!manualTurret) {
@@ -194,7 +195,7 @@ public class EliOp extends LinearOpMode {
                 currentRPM = (tps / Settings.fly_ticksPerRev) * 60.0;
             }
 
-            telemetry.addData("ALLIANCE", "RED");
+            telemetry.addData("ALLIANCE", "BLUE");
             telemetry.addData("Turret Mode (LB)", turretAutoMode ? "AUTO" : "MANUAL");
             telemetry.addData("Flywheel Mode (RB)", flywheelAutoMode ? "AUTO" : "MANUAL");
             telemetry.addData("RPM Actual", currentRPM);
