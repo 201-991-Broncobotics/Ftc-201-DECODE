@@ -1,8 +1,7 @@
 package mechanisms;
 
 import static mechanisms.Settings.FlyPower;
-import static mechanisms.Settings.closevel;
-import static mechanisms.Settings.farvel;
+import mechanisms.Settings;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -39,7 +38,7 @@ public class EmergencyFlywheel {
 
     }
     public void setFlywheel(double vel) {
-        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Settings.flykP, Settings.flykI, Settings.flykD, 0));
+        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Settings.fly_kP, Settings.fly_kI, Settings.fly_kD, 0));
         flywheel.setVelocity(vel);
     }
 
@@ -49,7 +48,7 @@ public class EmergencyFlywheel {
         }
         lastBPressed = Controller.left_bumper;
         if (flywheeltoggle) {
-            flywheel.setVelocity(Settings.flyVelocity / 60 * 20); // Set target speed
+            flywheel.setVelocity(Settings.fly_targetRPM / 60 * 20); // Set target speed
         } else {
             flywheel.setPower(0); // Stop flywheel
         }
@@ -61,10 +60,10 @@ public class EmergencyFlywheel {
 
         }
         if (Controller.dpad_left) {
-            setFlywheel(farvel);
+            setFlywheel(Settings.fly_farPreset);
         }
         if (Controller.dpad_right) {
-            setFlywheel(closevel);
+            setFlywheel(Settings.fly_closePreset);
 
         }
     }
