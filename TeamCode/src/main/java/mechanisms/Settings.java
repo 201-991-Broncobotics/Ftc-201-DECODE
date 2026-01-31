@@ -11,8 +11,9 @@ public class Settings {
     public static double IntakePowe = -1;
     public static double HighRolPow = -1;
     public static double SweMax = 1;
-    public static double reuppos = 0.25;
-    public static double redownpos = 0;
+    public static double reuppos = 0.63;
+    public static double redownpos = 1
+            ;
     public static double turret_P = -0.1;
     public static double turret_I = 0;
     public static double turret_D = 0;
@@ -27,7 +28,7 @@ public class Settings {
 
     public static double flykD = 0.001;
 
-    public static double flyVelocity = 37500;
+    public static double flyVelocity = 6000;
 
     public static int pipeline = 0;
 
