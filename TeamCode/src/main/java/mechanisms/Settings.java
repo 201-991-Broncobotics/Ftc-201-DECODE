@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class Settings {
 
+    // UPDATED: Default is now 2
     public static int numControllers = 2;
 
     // --- VISION ---
@@ -16,9 +17,9 @@ public class Settings {
 
     // --- FLYWHEEL FORMULA ---
     // Equation: RPM = 17.37098 * dist + 1242.65941
-    public static double fly_A = 0.0;
-    public static double fly_B = 17.37098;
-    public static double fly_C = 1242.65941;
+    public static double fly_A = 0.055;
+    public static double fly_B = 14;
+    public static double fly_C = 1242.;
 
     // --- FLYWHEEL PID ---
     public static double fly_targetRPM = 4500;
@@ -39,9 +40,7 @@ public class Settings {
     public static double tur_kI = -0.01;
     public static double tur_kD = -0.00085;
     public static double tur_static_F = 0.07;
-
-    // UPDATED: Much slower search speed
-    public static double tur_searchSpeed = 0.15;
+    public static double tur_searchSpeed = 0; //should be -.15 to activate
 
     // --- SWERVE ---
     public static double SwerveKP = 0.04;
@@ -58,7 +57,6 @@ public class Settings {
     public static double flick_UP = 0.43;
     public static double flick_DOWN = 0.95;
 
-    // Delay for release servo before shooting starts
     public static int shoot_delay_ms = 250;
 
     // --- RGB ---
