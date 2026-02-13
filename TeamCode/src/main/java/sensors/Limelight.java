@@ -1,88 +1,68 @@
 package sensors;
 
-
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
-import mechanisms.Settings;
-import mechanisms.Turret;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.List;
-
+import mechanisms.Settings;
+import sensors.PIDFController;
 
 public class Limelight {
-    boolean autotracktoggle, lastbumppressed = false;
     Gamepad Controller;
     private Limelight3A limelight;
     private LLResult results;
-    public Position robotPos = new Position();
-    private IMU imu;
-    private Turret turret;
 
+    public final PIDFController turretPID = new PIDFController(0, 0, 0, 0);
 
     public void init(HardwareMap hwdM, Gamepad controller, int pipeline) {
         limelight = hwdM.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(pipeline);
-        results = limelight.getLatestResult();
-        RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.FORWARD, RevHubOrientationOnRobot.UsbFacingDirection.DOWN);
+        try { results = limelight.getLatestResult(); } catch (Exception e) { }
         Controller = controller;
-
     }
 
-    public void start() {
-        limelight.start();
+    public void start() { if(limelight != null) limelight.start(); }
+    public LLResult getResult() { return (limelight != null) ? limelight.getLatestResult() : null; }
+
+    public double getTx() {
+        if(limelight == null) return 0;
+        results = limelight.getLatestResult();
+        return (results != null && results.isValid()) ? results.getTx() : 0;
     }
 
-    public LLResult getResult() {
-        return limelight.getLatestResult();
+    public double getYaw() {
+        if (limelight == null) return 0;
+        results = limelight.getLatestResult();
+        if (results == null || !results.isValid()) return 0;
+        List<LLResultTypes.FiducialResult> fids = results.getFiducialResults();
+        if (fids.isEmpty()) return 0;
+        return fids.get(0).getTargetPoseRobotSpace().getOrientation().getYaw(AngleUnit.DEGREES);
     }
-
-    public final PIDFController turretPID = new PIDFController(
-            Settings.turret_P,
-            Settings.turret_I,
-            Settings.turret_D,
-            0.0);
 
     public double getDistance() {
+        if(limelight == null) return 0;
         results = limelight.getLatestResult();
 
-        List<LLResultTypes.FiducialResult> fids = results.getFiducialResults();
+        if (results != null && results.isValid()) {
+            double verticalOffset = results.getTy();
 
-        for (LLResultTypes.FiducialResult f : fids) {
-            int id = f.getFiducialId();
-            Pose3D pos = f.getTargetPoseRobotSpace();
-            robotPos = pos.getPosition();
+            double totalAngleDeg = Settings.CAMERA_ANGLE_DEG + verticalOffset;
+            double totalAngleRad = Math.toRadians(totalAngleDeg);
 
-            return Math.hypot(robotPos.x, robotPos.z);
+            double heightDiff = Settings.TARGET_HEIGHT_IN - Settings.CAMERA_HEIGHT_IN;
 
+            if (Math.abs(Math.tan(totalAngleRad)) < 0.001) return 0;
+
+            double rawDistance = heightDiff / Math.tan(totalAngleRad);
+
+            // FIX: Account for camera offset so turning doesn't change distance
+            return rawDistance - Settings.CAMERA_OFFSET_FROM_CENTER;
         }
-        if (results.getFiducialResults().isEmpty()) {
-            return 0; }
-
-        if (fids.isEmpty()) {
-            return 0; // or -1
-            }
-
-        return 0;
-
-    }
-    public double predictVelocity(double dist) {
-        results = limelight.getLatestResult();
-        if (dist != 0) {
-            return (92.56652 * Math.pow(dist, 2)) - (379.27046 * dist) + 3505.80142;}
         return 0;
     }
 }
-

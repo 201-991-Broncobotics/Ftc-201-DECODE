@@ -1,6 +1,6 @@
 package sensors;
 
-import static mechanisms.Settings.RGBCOLOR;
+import static mechanisms.Settings.rgb_default;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;

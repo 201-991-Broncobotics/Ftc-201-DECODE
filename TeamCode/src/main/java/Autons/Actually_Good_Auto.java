@@ -32,20 +32,22 @@ public class Actually_Good_Auto extends LinearOpMode {
     @Override
     public void runOpMode(){
         Gamepad dummy = new Gamepad(); // no controller in autonomous
+        drive = new DiffySwerveKinematics(
+                hardwareMap.get(DcMotorEx.class, "lSwe0"),
+                hardwareMap.get(DcMotorEx.class, "lSwe1"),
+                hardwareMap.get(DcMotorEx.class, "rSwe1"),
+                hardwareMap.get(DcMotorEx.class, "rSwe0"),
+                SweMax, // max motor power limit
+                telemetry
+        );
         turret.init(hardwareMap, dummy);
-        flywheel.init(hardwareMap, dummy);
         intake.init(hardwareMap, dummy);
         limelight.init(hardwareMap, dummy, 0);
         intake.setBallflick(90);            // push up
 
-
-
+        waitForStart();
         while(opModeIsActive()){;
-        flywheel.autoDistance();
-        sleep(5000);
-        intake.runAutoShooter(true);
-        sleep(15000);
-        drive.drive(1,0,0,0);
+        drive.drive(-1,0,0,1);
     }
 }
 }
