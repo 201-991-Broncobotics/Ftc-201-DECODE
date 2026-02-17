@@ -43,11 +43,13 @@ public class Actually_Good_Auto extends LinearOpMode {
         turret.init(hardwareMap, dummy);
         intake.init(hardwareMap, dummy);
         limelight.init(hardwareMap, dummy, 0);
-        intake.setBallflick(90);            // push up
+       /* intake.setBallflick(90);            // push up
 
         waitForStart();
         while(opModeIsActive()){;
         drive.drive(-1,0,0,1);
     }
+
+        */
 }
 }

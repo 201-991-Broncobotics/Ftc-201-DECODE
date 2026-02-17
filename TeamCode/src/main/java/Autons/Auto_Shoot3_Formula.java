@@ -47,8 +47,9 @@ public class Auto_Shoot3_Formula extends LinearOpMode {
         drive.zeroModules();
 
         // 1. INIT ACTION: Push Servo DOWN immediately
-        intake.setBallflick(Settings.flick_DOWN);
+       /* intake.setBallflick(Settings.flick_DOWN);
 
+        */
         // SWITCHED: Set offset for Blue side
         Settings.aimOffsetScale = -1.1;
 
@@ -111,7 +112,6 @@ public class Auto_Shoot3_Formula extends LinearOpMode {
             // Cycle: Flick UP (250ms) -> Flick DOWN+SHOOT (800ms)
 
             // 1. Flick UP
-            intake.setBallflick(Settings.flick_UP);
             long flickUpEnd = System.currentTimeMillis() + 250;
             while(opModeIsActive() && System.currentTimeMillis() < flickUpEnd) {
                 updateSystems(); // Keep aiming
@@ -119,7 +119,6 @@ public class Auto_Shoot3_Formula extends LinearOpMode {
             }
 
             // 2. Flick DOWN + SHOOT
-            intake.setBallflick(Settings.flick_DOWN);
             intake.setHighroll(-1);
             intake.setIntake(-1);
             intake.lowerRollers(-1);
@@ -147,7 +146,6 @@ public class Auto_Shoot3_Formula extends LinearOpMode {
         ElapsedTime timer = new ElapsedTime();
 
         if (runIntake) {
-            intake.setBallflick(Settings.flick_DOWN);
             intake.setIntake(Settings.IntakePowe);
             intake.setHighroll(Settings.HighRolPow);
             intake.lowerRollers(-1);

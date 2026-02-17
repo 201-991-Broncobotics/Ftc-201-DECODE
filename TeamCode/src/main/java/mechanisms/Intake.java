@@ -1,5 +1,7 @@
 package mechanisms;
 
+import android.health.connect.datatypes.units.Power;
+
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -14,13 +16,16 @@ public class Intake {
 
     Gamepad Controller;
     private DcMotor intake, highroll;
-    private Servo ballflick, SortServo, realeaseservo;
+    private Servo ballflick, SortServo, realeaseservo,pushservo1,pushservo2;
     private CRServo lowerroller1, lowerroller2;
 
     public void init(HardwareMap hwdM, Gamepad controller) {
         intake = hwdM.get(DcMotor.class, "intM");
         highroll = hwdM.get(DcMotor.class, "hRolM");
-        ballflick = hwdM.get(Servo.class, "pusS");
+        pushservo1 = hwdM.get(Servo.class, "pusS0");
+        pushservo2 = hwdM.get(Servo.class, "pusS1");
+
+
         lowerroller1 = hwdM.get(CRServo.class, "lRolS0");
         lowerroller2 = hwdM.get(CRServo.class, "lRolS1");
         SortServo = hwdM.get(Servo.class, "sorS");
@@ -30,7 +35,7 @@ public class Intake {
 
     public void setHighroll(double power) { highroll.setPower(power); }
     public void setIntake(double power) { intake.setPower(power); }
-    public void setBallflick(double pos) { ballflick.setPosition(pos); }
+    public void setPushservos(double pos) {pushservo1.setPosition(pos);pushservo2.setPosition(pos); }
     public void lowerRollers(double power) {
         lowerroller1.setPower(power);
         lowerroller2.setPower(power);
@@ -51,7 +56,6 @@ public class Intake {
 
             switch (shootState) {
                 case 0: // NEW: Wait for Gate Servo to Open
-                    setBallflick(Settings.flick_DOWN); // Keep flicker out of way
 
                     if (shootTimer.milliseconds() >= Settings.shoot_delay_ms) {
                         shootTimer.reset();
@@ -60,7 +64,6 @@ public class Intake {
                     break;
 
                 case 1: // Flick Up (Preparation)
-                    setBallflick(Settings.flick_UP);
 
                     if (shootTimer.milliseconds() >= 220) {
                         shootTimer.reset();
@@ -69,7 +72,7 @@ public class Intake {
                     break;
 
                 case 2: // Flick Down & Shoot
-                    setBallflick(Settings.flick_DOWN);
+                   setPushservos(90);
                     setHighroll(-1);
                     setIntake(-1);
                     lowerRollers(-1);
@@ -83,7 +86,6 @@ public class Intake {
         }
         else {
             // --- IDLE STATE ---
-            setBallflick(Settings.flick_DOWN);
             realeaseservo.setPosition(Settings.reuppos); // CLOSE GATE
 
             // --- MANUAL INTAKE ---
@@ -91,15 +93,20 @@ public class Intake {
                 setIntake(Settings.IntakePowe);
                 setHighroll(Settings.HighRolPow);
                 lowerRollers(-1);
+                setPushservos(90);
             }
             else if (Controller.x) {
                 setIntake(-Settings.IntakePowe);
                 setHighroll(-Settings.HighRolPow);
                 lowerRollers(1);
+                setPushservos(0);
+
             }
             else {
                 setIntake(0);
                 setHighroll(0);
+                setPushservos(0);
+
                 lowerRollers(0);
             }
         }
