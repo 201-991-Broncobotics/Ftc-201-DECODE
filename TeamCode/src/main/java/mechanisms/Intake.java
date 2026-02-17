@@ -73,7 +73,7 @@ public class Intake {
 
                 case 2: // Flick Down & Shoot
                    setPushservos(90);
-                    setHighroll(-1);
+                    setHighroll(1);
                     setIntake(-1);
                     lowerRollers(-1);
 

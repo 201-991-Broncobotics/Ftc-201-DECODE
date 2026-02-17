@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.Range;
 import sensors.Limelight;
 
 public class Flywheel {
-    public DcMotorEx fly;
+    public DcMotorEx fly0, fly1;
     Gamepad gamepad;
     Limelight limelight;
 
@@ -19,26 +19,31 @@ public class Flywheel {
     double lastError = 0;
     ElapsedTime timer = new ElapsedTime();
 
+
     public void init(HardwareMap hwMap, Gamepad gamepad, Limelight limelight) {
         this.gamepad = gamepad;
         this.limelight = limelight;
 
         try {
-            fly = hwMap.get(DcMotorEx.class, "flyM");
-            fly.setDirection(DcMotorSimple.Direction.REVERSE);
-            fly.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            fly.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            fly0 = hwMap.get(DcMotorEx.class, "fly0");
+            fly0.setDirection(DcMotorSimple.Direction.REVERSE);
+            fly0.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            fly0.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            fly1 = hwMap.get(DcMotorEx.class, "fly1");
+            fly1.setDirection(DcMotorSimple.Direction.FORWARD);
+            fly1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            fly1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         } catch (Exception e) { }
     }
 
     public void controls() {
-        if (fly == null) return;
+        if (fly0 == null) return;
 
         // Updated to flattened Settings
         double targetRPM = Settings.fly_targetRPM;
 
         // Calculate RPM
-        double currentTps = fly.getVelocity();
+        double currentTps = fly0.getVelocity()*2;
         double currentRPM = (currentTps / Settings.fly_ticksPerRev) * 60.0;
 
         // PID
@@ -66,6 +71,7 @@ public class Flywheel {
             integralSum = 0;
         }
 
-        fly.setPower(Range.clip(finalPower, -1, 1));
+        fly0.setPower(Range.clip(finalPower, -1, 1)/2);
+        fly1.setPower(Range.clip(finalPower, -1, 1)/2);
     }
 }

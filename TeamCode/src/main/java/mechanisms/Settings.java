@@ -49,7 +49,7 @@ public class Settings {
 
     // --- INTAKE & SERVO POSITIONS ---
     public static double IntakePowe = -1;
-    public static double HighRolPow = -1;
+    public static double HighRolPow = 1;
 
     public static double reuppos = 0.63;
     public static double redownpos = 1;

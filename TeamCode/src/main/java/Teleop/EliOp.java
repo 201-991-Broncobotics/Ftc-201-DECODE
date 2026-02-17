@@ -45,6 +45,7 @@ public class EliOp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
         Settings.aimOffsetScale = 1.1; // RED Offset
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -64,7 +65,9 @@ public class EliOp extends LinearOpMode {
         rgb.init(hardwareMap, mechController);
         rgb.setRgb(Settings.rgb_default);
 
-        try { flyMotorReader = hardwareMap.get(DcMotorEx.class, "flyM"); } catch (Exception e) {}
+        try { flyMotorReader = hardwareMap.get(DcMotorEx.class, "fly0"); } catch (Exception e) {}
+        try { flyMotorReader = hardwareMap.get(DcMotorEx.class, "fly1"); } catch (Exception e) {}
+
 
         drive = new DiffySwerveKinematics(
                 hardwareMap.get(DcMotorEx.class, "lSwe0"),
@@ -74,7 +77,6 @@ public class EliOp extends LinearOpMode {
                 SweMax, telemetry
         );
         drive.zeroModules();
-
         telemetry.addData("ALLIANCE", "RED");
         waitForStart();
         limelight.start();
