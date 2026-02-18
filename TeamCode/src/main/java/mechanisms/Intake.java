@@ -16,7 +16,7 @@ public class Intake {
 
     Gamepad Controller;
     private DcMotor intake, highroll;
-    private Servo ballflick, SortServo, realeaseservo,pushservo1,pushservo2;
+    private Servo ballflick, SortServo, realeaseservo, pushservo1, pushservo2;
     private CRServo lowerroller1, lowerroller2;
 
     public void init(HardwareMap hwdM, Gamepad controller) {
@@ -33,9 +33,19 @@ public class Intake {
         Controller = controller;
     }
 
-    public void setHighroll(double power) { highroll.setPower(power); }
-    public void setIntake(double power) { intake.setPower(power); }
-    public void setPushservos(double pos) {pushservo1.setPosition(pos);pushservo2.setPosition(pos); }
+    public void setHighroll(double power) {
+        highroll.setPower(power);
+    }
+
+    public void setIntake(double power) {
+        intake.setPower(power);
+    }
+
+    public void setPushservos(double pos) {
+        pushservo1.setPosition(pos);
+        pushservo2.setPosition(pos);
+    }
+
     public void lowerRollers(double power) {
         lowerroller1.setPower(power);
         lowerroller2.setPower(power);
@@ -72,7 +82,7 @@ public class Intake {
                     break;
 
                 case 2: // Flick Down & Shoot
-                   setPushservos(90);
+                    setPushservos(90);
                     setHighroll(1);
                     setIntake(-1);
                     lowerRollers(-1);
@@ -83,8 +93,7 @@ public class Intake {
                     }
                     break;
             }
-        }
-        else {
+        } else {
             // --- IDLE STATE ---
             realeaseservo.setPosition(Settings.reuppos); // CLOSE GATE
 
@@ -94,20 +103,22 @@ public class Intake {
                 setHighroll(Settings.HighRolPow);
                 lowerRollers(-1);
                 setPushservos(90);
-            }
-            else if (Controller.x) {
+            } else if (Controller.x) {
                 setIntake(-Settings.IntakePowe);
                 setHighroll(-Settings.HighRolPow);
                 lowerRollers(1);
-                setPushservos(0);
+                setPushservos(90);
 
-            }
-            else {
+            } else {
                 setIntake(0);
                 setHighroll(0);
-                setPushservos(0);
+                setPushservos(90);
+
 
                 lowerRollers(0);
+            }
+            if (Controller.y) {
+                setPushservos(90);
             }
         }
     }

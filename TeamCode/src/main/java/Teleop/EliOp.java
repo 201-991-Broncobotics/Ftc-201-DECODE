@@ -31,7 +31,7 @@ public class EliOp extends LinearOpMode {
     Intake intake = new Intake();
     RGB rgb = new RGB();
     private Limelight limelight = new Limelight();
-    private DcMotorEx flyMotorReader;
+    private DcMotorEx flyMotorReader,flyMotorReader2;
 
     boolean turretAutoMode = false;
     boolean flywheelAutoMode = false;
@@ -66,7 +66,7 @@ public class EliOp extends LinearOpMode {
         rgb.setRgb(Settings.rgb_default);
 
         try { flyMotorReader = hardwareMap.get(DcMotorEx.class, "fly0"); } catch (Exception e) {}
-        try { flyMotorReader = hardwareMap.get(DcMotorEx.class, "fly1"); } catch (Exception e) {}
+        try { flyMotorReader2 = hardwareMap.get(DcMotorEx.class, "fly1"); } catch (Exception e) {}
 
 
         drive = new DiffySwerveKinematics(
@@ -192,14 +192,23 @@ public class EliOp extends LinearOpMode {
             // Telemetry
             double currentRPM = 0;
             if (flyMotorReader != null) {
-                double tps = flyMotorReader.getVelocity();
+                double tps = flyMotorReader.getVelocity()*2;
                 currentRPM = (tps / Settings.fly_ticksPerRev) * 60.0;
+
             }
+            double currentRPM2 = 0;
+            if (flyMotorReader2 != null) {
+                double tps = flyMotorReader2.getVelocity();
+                currentRPM2 = (tps / Settings.fly_ticksPerRev) * 60.0;
+            }
+
 
             telemetry.addData("ALLIANCE", "RED");
             telemetry.addData("Turret Mode (LB)", turretAutoMode ? "AUTO" : "MANUAL");
             telemetry.addData("Flywheel Mode (RB)", flywheelAutoMode ? "AUTO" : "MANUAL");
-            telemetry.addData("RPM Actual", currentRPM);
+            telemetry.addData("RPM Actual1", currentRPM);
+            telemetry.addData("RPM Actual2", currentRPM2);
+
             telemetry.addData("RPM Target", Settings.fly_targetRPM);
             telemetry.addData("Last Tx", lastKnownTx);
             telemetry.update();

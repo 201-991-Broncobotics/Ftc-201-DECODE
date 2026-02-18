@@ -71,7 +71,7 @@ public class Flywheel {
             integralSum = 0;
         }
 
-        fly0.setPower(Range.clip(finalPower, -1, 1)/2);
-        fly1.setPower(Range.clip(finalPower, -1, 1)/2);
+        fly0.setPower(Range.clip(finalPower/2, -1, 1));
+        fly1.setPower(Range.clip(finalPower/2, -1, 1));
     }
 }

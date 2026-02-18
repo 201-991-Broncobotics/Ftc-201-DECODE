@@ -23,7 +23,7 @@ public class pinpoint implements Localizer {
         driver = hardwareMap.get(GoBildaPinpointDriver.class, "pin0");
 
         // Set Offsets (X, Y in inches)
-        driver.setOffsets(constants.forwardPodY, constants.strafePodX, DistanceUnit.INCH);
+        driver.setOffsets(3, 10, DistanceUnit.INCH);
 
         // Set Encoder Resolution
         driver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
@@ -36,6 +36,7 @@ public class pinpoint implements Localizer {
 
         driver.resetPosAndIMU();
         startPose = new Pose(0,0,0);
+
     }
 
     @Override
@@ -48,20 +49,26 @@ public class pinpoint implements Localizer {
                 rawPose.getHeading(AngleUnit.RADIANS)
         );
     }
+    private Pose lastPose = new Pose(0,0,0);
+    private long lastTime = System.nanoTime();
+    private Pose currentVelocity = new Pose(0,0,0);
+
+
 
     @Override
     public Pose getVelocity() {
-        return null;
+        return currentVelocity;
     }
 
     @Override
     public Vector getVelocityVector() {
-        // Return just the translational velocity as a Vector
         return new Vector(
-                getVelocity().getX(),
-                getVelocity().getY()
+                currentVelocity.getX(),
+                currentVelocity.getY()
         );
     }
+
+
 
     @Override
     public void setStartPose(Pose pose) {
@@ -78,6 +85,22 @@ public class pinpoint implements Localizer {
     @Override
     public void update() {
         driver.update();
+
+        Pose currentPose = getPose();
+
+        long now = System.nanoTime();
+        double dt = (now - lastTime) / 1e9; // seconds
+
+        if (dt > 0) {
+            double vx = (currentPose.getX() - lastPose.getX()) / dt;
+            double vy = (currentPose.getY() - lastPose.getY()) / dt;
+            double vHeading = (currentPose.getHeading() - lastPose.getHeading()) / dt;
+
+            currentVelocity = new Pose(vx, vy, vHeading);
+        }
+
+        lastPose = currentPose;
+        lastTime = now;
     }
 
     @Override
@@ -101,8 +124,9 @@ public class pinpoint implements Localizer {
 
     @Override
     public double getIMUHeading() {
-        return 0;
+        return driver.getPosition().getHeading(AngleUnit.RADIANS);
     }
+
 
     @Override
     public boolean isNAN() {
