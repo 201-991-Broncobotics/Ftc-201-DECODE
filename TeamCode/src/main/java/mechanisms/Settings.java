@@ -1,7 +1,6 @@
 package mechanisms;
 
 import com.acmerobotics.dashboard.config.Config;
-
 @Config
 public class Settings {
 

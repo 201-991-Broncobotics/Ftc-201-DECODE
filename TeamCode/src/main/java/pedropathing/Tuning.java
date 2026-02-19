@@ -35,8 +35,8 @@ import java.util.List;
  * @author Baron Henderson - 20077 The Indubitables
  * @version 1.0, 6/26/2025
  */
-@Config
 @TeleOp(name = "Tuning", group = "Pedro Pathing")
+@Config
 public class Tuning extends SelectableOpMode {
     public static Follower follower;
 
@@ -737,6 +737,7 @@ class LateralZeroPowerAccelerationTuner extends OpMode {
  * @author Harrison Womack - 10158 Scott's Bots
  * @version 1.0, 3/12/2024
  */
+@Config
 class TranslationalTuner extends OpMode {
     public static double DISTANCE = 40;
     private boolean forward = true;

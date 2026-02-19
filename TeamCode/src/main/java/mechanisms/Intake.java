@@ -118,7 +118,7 @@ public class Intake {
                 lowerRollers(0);
             }
             if (Controller.y) {
-                setPushservos(90);
+                setPushservos(0);
             }
         }
     }

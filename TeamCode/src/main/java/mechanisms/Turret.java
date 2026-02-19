@@ -21,7 +21,7 @@ public class Turret {
 
     public void init(HardwareMap hdwMap, Gamepad controller) {
         turret1 = hdwMap.get(CRServo.class, "turS1");
-        turret2 = hdwMap.get(CRServo.class, "turS2");
+        turret2 = hdwMap.get(CRServo.class, "turS0");
         Controller = controller;
 
 
