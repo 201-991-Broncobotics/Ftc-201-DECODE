@@ -43,7 +43,7 @@ public class Flywheel {
         double targetRPM = Settings.fly_targetRPM;
 
         // Calculate RPM
-        double currentTps = fly0.getVelocity()*2;
+        double currentTps = fly0.getVelocity();
         double currentRPM = (currentTps / Settings.fly_ticksPerRev) * 60.0;
 
         // PID
@@ -71,7 +71,7 @@ public class Flywheel {
             integralSum = 0;
         }
 
-        fly0.setPower(Range.clip(finalPower/2, -1, 1));
-        fly1.setPower(Range.clip(finalPower/2, -1, 1));
+        fly0.setPower(Range.clip(finalPower, -1, 1));
+        fly1.setPower(Range.clip(finalPower, -1, 1));
     }
 }

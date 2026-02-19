@@ -192,7 +192,7 @@ public class EliOp extends LinearOpMode {
             // Telemetry
             double currentRPM = 0;
             if (flyMotorReader != null) {
-                double tps = flyMotorReader.getVelocity()*2;
+                double tps = flyMotorReader.getVelocity();
                 currentRPM = (tps / Settings.fly_ticksPerRev) * 60.0;
 
             }
