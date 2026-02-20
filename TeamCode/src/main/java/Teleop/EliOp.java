@@ -211,6 +211,7 @@ public class EliOp extends LinearOpMode {
 
             telemetry.addData("RPM Target", Settings.fly_targetRPM);
             telemetry.addData("Last Tx", lastKnownTx);
+            telemetry.addData("LimeLight", limelight.getTx());
             telemetry.update();
         }
     }

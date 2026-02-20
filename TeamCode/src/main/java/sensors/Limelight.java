@@ -20,7 +20,7 @@ public class Limelight {
     public final PIDFController turretPID = new PIDFController(0, 0, 0, 0);
 
     public void init(HardwareMap hwdM, Gamepad controller, int pipeline) {
-        limelight = hwdM.get(Limelight3A.class, "limelight");
+        limelight = hwdM.get(Limelight3A.class, "liml");
         limelight.pipelineSwitch(pipeline);
         try { results = limelight.getLatestResult(); } catch (Exception e) { }
         Controller = controller;

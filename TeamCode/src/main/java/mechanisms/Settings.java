@@ -11,26 +11,26 @@ public class Settings {
     public static double CAMERA_HEIGHT_IN = 16.5;
     public static double TARGET_HEIGHT_IN = 31.0;
     public static double CAMERA_ANGLE_DEG = 10.0;
-    public static double aimOffsetScale = 1.1;
+    public static double aimOffsetScale = -2;
     public static double CAMERA_OFFSET_FROM_CENTER = -5.0;
 
     // --- FLYWHEEL FORMULA ---
     // Equation: RPM = 17.37098 * dist + 1242.65941
-    public static double fly_A = 0.055;
-    public static double fly_B = 14;
-    public static double fly_C = 1242.;
+    public static double fly_A = 0.028;
+    public static double fly_B = 7.5;
+    public static double fly_C = 1900;
 
     // --- FLYWHEEL PID ---
-    public static double fly_targetRPM = 4500;
+    public static double fly_targetRPM = 100;
     public static double fly_ticksPerRev = 28.0;
-    public static double fly_kP = 5.0;
-    public static double fly_kI = 0.005;
-    public static double fly_kD = 0.05;
+    public static double fly_kP = 3;
+    public static double fly_kI = 0.01;
+    public static double fly_kD = 0;
     public static double fly_pidDivisor = 1000.0;
 
     public static double fly_farPreset = 2720;
     public static double fly_closePreset = 2200;
-    public static double FlyPower = 0.5;
+    public static double FlyPower = 1;
 
     // --- TURRET ---
     public static double tur_maxSpeed = 1.0;
