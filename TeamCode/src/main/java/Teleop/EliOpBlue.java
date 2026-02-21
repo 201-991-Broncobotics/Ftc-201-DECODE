@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 import Diffy.DiffySwerveKinematics;
 import mechanisms.Flywheel;
 import mechanisms.Intake;
@@ -20,7 +22,7 @@ import mechanisms.Turret;
 import sensors.Limelight;
 import sensors.RGB;
 
-@TeleOp(name = "Eli Op BLUE", group = "Concept")
+@TeleOp(name = "Eli Op Blue", group = "Concept")
 public class EliOpBlue extends LinearOpMode {
     DiffySwerveKinematics drive;
     Gamepad mechController;
@@ -31,7 +33,7 @@ public class EliOpBlue extends LinearOpMode {
     Intake intake = new Intake();
     RGB rgb = new RGB();
     private Limelight limelight = new Limelight();
-    private DcMotorEx flyMotorReader;
+    private DcMotorEx flyMotorReader,flyMotorReader2;
 
     boolean turretAutoMode = false;
     boolean flywheelAutoMode = false;
@@ -45,7 +47,8 @@ public class EliOpBlue extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        Settings.aimOffsetScale = -1.1; // BLUE Offset
+
+        Settings.aimOffsetScale = 1.1; // RED Offset
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
@@ -64,7 +67,9 @@ public class EliOpBlue extends LinearOpMode {
         rgb.init(hardwareMap, mechController);
         rgb.setRgb(Settings.rgb_default);
 
-        try { flyMotorReader = hardwareMap.get(DcMotorEx.class, "flyM"); } catch (Exception e) {}
+        try { flyMotorReader = hardwareMap.get(DcMotorEx.class, "fly0"); } catch (Exception e) {}
+        try { flyMotorReader2 = hardwareMap.get(DcMotorEx.class, "fly1"); } catch (Exception e) {}
+
 
         drive = new DiffySwerveKinematics(
                 hardwareMap.get(DcMotorEx.class, "lSwe0"),
@@ -74,7 +79,6 @@ public class EliOpBlue extends LinearOpMode {
                 SweMax, telemetry
         );
         drive.zeroModules();
-
         telemetry.addData("ALLIANCE", "BLUE");
         waitForStart();
         limelight.start();
@@ -103,7 +107,6 @@ public class EliOpBlue extends LinearOpMode {
                         Settings.fly_C;
             }
 
-            // Flywheel Logic
             if (flywheelAutoMode) {
                 if (distance > 0) Settings.fly_targetRPM = formulaRPM;
                 if (mechController.dpad_up || mechController.dpad_down || mechController.dpad_left || mechController.dpad_right) {
@@ -171,13 +174,13 @@ public class EliOpBlue extends LinearOpMode {
                     // --- TARGET LOST (SEARCH MODE) ---
                     // FIXED: Only spin if we have seen it at least once
                     if (lastKnownTx == 0) {
-                        turret.autoTrack(0); // Stay still
+                        turret.autoTrack(0); // Stay still, haven't found it yet
                     }
                     else if (lastKnownTx > 0) {
-                        turret.autoTrack(-Settings.tur_searchSpeed); // Spin Left
+                        turret.autoTrack(-Settings.tur_searchSpeed); // Spin Left (slowly)
                     }
                     else {
-                        turret.autoTrack(Settings.tur_searchSpeed);  // Spin Right
+                        turret.autoTrack(Settings.tur_searchSpeed);  // Spin Right (slowly)
                     }
                 }
             } else if (!manualTurret) {
@@ -185,7 +188,7 @@ public class EliOpBlue extends LinearOpMode {
             }
 
             flywheel.controls();
-            intake.control();
+            intake.control(flywheel.getCurrentRPM());
             drive.drive(driveController.left_stick_y, driveController.left_stick_x, driveController.right_stick_x, 1.0);
 
             // Telemetry
@@ -193,14 +196,25 @@ public class EliOpBlue extends LinearOpMode {
             if (flyMotorReader != null) {
                 double tps = flyMotorReader.getVelocity();
                 currentRPM = (tps / Settings.fly_ticksPerRev) * 60.0;
+
+            }
+            double currentRPM2 = 0;
+            if (flywheel != null) {
+                // double tps = flyMotorReader2.getVelocity();
+                //currentRPM2 = (tps / Settings.fly_ticksPerRev) * 60.0;
+                currentRPM2 = flywheel.fly0.getVelocity(AngleUnit.RADIANS) / (2*Math.PI) * 60;
             }
 
-            telemetry.addData("ALLIANCE", "BLUE");
+
+            telemetry.addData("ALLIANCE", "RED");
             telemetry.addData("Turret Mode (LB)", turretAutoMode ? "AUTO" : "MANUAL");
             telemetry.addData("Flywheel Mode (RB)", flywheelAutoMode ? "AUTO" : "MANUAL");
-            telemetry.addData("RPM Actual", currentRPM);
+            telemetry.addData("RPM Actual1", currentRPM);
+            telemetry.addData("RPM Actual2", currentRPM2);
+
             telemetry.addData("RPM Target", Settings.fly_targetRPM);
             telemetry.addData("Last Tx", lastKnownTx);
+            telemetry.addData("LimeLight", limelight.getTx());
             telemetry.update();
         }
     }

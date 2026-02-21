@@ -53,11 +53,15 @@ public class Settings {
     public static double reuppos = 0.63;
     public static double redownpos = 1;
 
-    public static double flick_UP = 0.43;
-    public static double flick_DOWN = 0.95;
+    public static double flick_UP = 0;
+    public static double flick_DOWN = 90;
 
     public static int shoot_delay_ms = 250;
 
     // --- RGB ---
     public static double rgb_default = 1.0;
+    // Add these to your Settings class and tune them to your robot
+    public static double rpm_drop_amount = 150;     // RPM drop required to count a ball
+    public static double rpm_recovery_amount = 50;  // RPM must return within 50 of target before counting the next ball
+    public static double post_shot_delay_ms = 500;  // The variable amount of time to wait after 2nd ball
 }

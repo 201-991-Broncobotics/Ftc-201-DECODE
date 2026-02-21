@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 import Diffy.DiffySwerveKinematics;
 import mechanisms.Flywheel;
 import mechanisms.Intake;
@@ -186,7 +188,9 @@ public class EliOp extends LinearOpMode {
             }
 
             flywheel.controls();
-            intake.control();
+            intake.control(flywheel.getCurrentRPM());
+
+            // --- DRIVE CONTROLS ---
             drive.drive(driveController.left_stick_y, driveController.left_stick_x, driveController.right_stick_x, 1.0);
 
             // Telemetry
@@ -197,9 +201,10 @@ public class EliOp extends LinearOpMode {
 
             }
             double currentRPM2 = 0;
-            if (flyMotorReader2 != null) {
-                double tps = flyMotorReader2.getVelocity();
-                currentRPM2 = (tps / Settings.fly_ticksPerRev) * 60.0;
+            if (flywheel != null) {
+                // double tps = flyMotorReader2.getVelocity();
+                //currentRPM2 = (tps / Settings.fly_ticksPerRev) * 60.0;
+                currentRPM2 = flywheel.fly0.getVelocity(AngleUnit.RADIANS) / (2*Math.PI) * 60;
             }
 
 

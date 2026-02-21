@@ -19,6 +19,8 @@ public class Flywheel {
     double lastError = 0;
     ElapsedTime timer = new ElapsedTime();
 
+    // NEW: Class-level variable to store and expose RPM
+    public double currentRPM = 0;
 
     public void init(HardwareMap hwMap, Gamepad gamepad, Limelight limelight) {
         this.gamepad = gamepad;
@@ -36,15 +38,19 @@ public class Flywheel {
         } catch (Exception e) { }
     }
 
+    // NEW: Getter so Intake can read the RPM
+    public double getCurrentRPM() {
+        return currentRPM;
+    }
+
     public void controls() {
         if (fly0 == null) return;
 
-        // Updated to flattened Settings
         double targetRPM = Settings.fly_targetRPM;
 
-        // Calculate RPM
+        // Calculate RPM and store it in the class variable
         double currentTps = fly0.getVelocity();
-        double currentRPM = (currentTps / Settings.fly_ticksPerRev) * 60.0;
+        this.currentRPM = (currentTps / Settings.fly_ticksPerRev) * 60.0;
 
         // PID
         double error = targetRPM - currentRPM;
@@ -73,5 +79,9 @@ public class Flywheel {
 
         fly0.setPower(Range.clip(finalPower, -1, 1));
         fly1.setPower(Range.clip(finalPower, -1, 1));
+
+//fly0.setVelocity(targetRPM / 60.0 * 2*Math.PI, AngleUnit.RADIANS);
+
+//fly1.setVelocity(targetRPM / 60.0 * 2*Math.PI, AngleUnit.RADIANS);
     }
 }
