@@ -5,13 +5,13 @@ import com.acmerobotics.dashboard.config.Config;
 public class Settings {
 
     // UPDATED: Default is now 2
-    public static int numControllers = 2;
+    public static int numControllers = 1;
 
     // --- VISION ---
     public static double CAMERA_HEIGHT_IN = 16.5;
     public static double TARGET_HEIGHT_IN = 31.0;
     public static double CAMERA_ANGLE_DEG = 10.0;
-    public static double aimOffsetScale = -2;
+    public static double aimOffsetScale = -1;
     public static double CAMERA_OFFSET_FROM_CENTER = -5.0;
 
     // --- FLYWHEEL FORMULA ---
@@ -23,9 +23,9 @@ public class Settings {
     // --- FLYWHEEL PID ---
     public static double fly_targetRPM = 100;
     public static double fly_ticksPerRev = 28.0;
-    public static double fly_kP = 3;
-    public static double fly_kI = 0.01;
-    public static double fly_kD = 0;
+    public static double fly_kP = 1.4;
+    public static double fly_kI = 0;
+    public static double fly_kD = 0.001;
     public static double fly_pidDivisor = 1000.0;
 
     public static double fly_farPreset = 2720;
@@ -36,7 +36,7 @@ public class Settings {
     public static double tur_maxSpeed = 1.0;
     public static double tur_tolerance = 1.0;
     public static double tur_kP = -0.00185;
-    public static double tur_kI = -0.01;
+    public static double tur_kI = 0;
     public static double tur_kD = -0.00085;
     public static double tur_static_F = 0.07;
     public static double tur_searchSpeed = 0; //should be -.15 to activate

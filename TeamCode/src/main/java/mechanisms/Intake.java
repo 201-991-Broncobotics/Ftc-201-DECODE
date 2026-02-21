@@ -48,7 +48,7 @@ public class Intake {
 
     public void lowerRollers(double power) {
         lowerroller1.setPower(power);
-        lowerroller2.setPower(power);
+        lowerroller2.setPower(-power);
     }
 
     public void control() {

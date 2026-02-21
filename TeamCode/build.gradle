@@ -64,7 +64,7 @@ dependencies {
     implementation "com.acmerobotics.dashboard:dashboard:0.5.1"
 
     dependencies {
-        implementation "com.bylazar:fullpanels:<VERSION>"
+        implementation "com.bylazar:fullpanels"
     }
 
 
